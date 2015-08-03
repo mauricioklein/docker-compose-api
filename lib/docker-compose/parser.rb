@@ -11,8 +11,9 @@ module DockerCompose::Parser
       puts "Compose file doesn't exists"
     end
 
-    @entries = Array.new
+    @entries = Hash.new
     _compose_entries = YAML.load_file(filepath)
+    puts "PLAIN: #{_compose_entries}"
     _compose_entries.each do |entry|
       attr_hash = {
         'id'      => entry[0],
@@ -20,28 +21,25 @@ module DockerCompose::Parser
         'image'   => entry[1]['image'],
         'ports'   => entry[1]['ports'],
         'volumes' => entry[1]['volumes'],
-        'links'   => entry[1]['links']
+        'links'   => entry[1]['links'],
+        'command' => entry[1]['command']
       }
-      @entries << ComposeEntry.new(attr_hash)
+      puts "Entry: #{attr_hash.inspect}"
+      @entries[attr_hash['id']] = ComposeEntry.new(attr_hash)
     end
   end
 
   def self.start
-    # First, download/build all necessary images
-    @entries.each do |entry|
-      puts "Entry: #{entry.inspect.to_json}"
-      #unless entry['image'].nil?
-      #  puts "Downloading image: #{entry['image']}"
-      #  Docker::Image.create('fromImage' => entry['image'], 'tag' => 'latest')
-      #end
+    @entries.each do |id, entry|
+      puts "Starting container: #{id}"
+      entry.start
     end
+  end
 
-    # Now, start all necessary containers
-    @entries.each do |entry|
-      #unless entry['image'].nil?
-      #  puts "Starting container from image: #{entry['image']}"
-      #  Docker::Container.create('Image' => entry['image']).start
-      #end
+  def self.stop
+    @entries.each do |id, entry|
+      puts "Stoping container: #{id}"
+      entry.stop
     end
   end
 end
