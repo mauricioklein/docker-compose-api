@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'docker/compose/api/version'
+require 'docker-compose/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "docker-compose-api"
-  spec.version       = ComposeApi::VERSION
+  spec.version       = DockerCompose::VERSION
   spec.authors       = ["Mauricio S. Klein"]
   spec.email         = ["mauricio.klein.msk@gmail.com"]
   spec.summary       = %q{A simple ruby client for docker/docker-compose remote api.}
@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "docker-api", "~> 1.22.2"
 
-  spec.add_development_dependency "bundler", "~> 1.7"
+  spec.add_development_dependency "bundler", "~> 1.3.5"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec"
 end
