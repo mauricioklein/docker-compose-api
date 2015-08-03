@@ -22,25 +22,26 @@ module DockerCompose::Parser
         'volumes' => entry[1]['volumes'],
         'links'   => entry[1]['links']
       }
-      @entries << attr_hash
+      @entries << ComposeEntry.new(attr_hash)
     end
   end
 
   def self.start
     # First, download/build all necessary images
     @entries.each do |entry|
-      unless entry['image'].nil?
-        puts "Downloading image: #{entry['image']}"
-        Docker::Image.create('fromImage' => entry['image'], 'tag' => 'latest')
-      end
+      puts "Entry: #{entry.inspect.to_json}"
+      #unless entry['image'].nil?
+      #  puts "Downloading image: #{entry['image']}"
+      #  Docker::Image.create('fromImage' => entry['image'], 'tag' => 'latest')
+      #end
     end
 
     # Now, start all necessary containers
     @entries.each do |entry|
-      unless entry['image'].nil?
-        puts "Starting container from image: #{entry['image']}"
-        Docker::Container.create('Image' => entry['image']).start
-      end
+      #unless entry['image'].nil?
+      #  puts "Starting container from image: #{entry['image']}"
+      #  Docker::Container.create('Image' => entry['image']).start
+      #end
     end
   end
 end
