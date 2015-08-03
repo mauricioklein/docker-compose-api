@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/mauricioklein/docker-compose-api.svg?branch=develop)](https://travis-ci.org/mauricioklein/docker-compose-api)
+
 # Docker::Compose::Api
 
 TODO: Write a gem description
