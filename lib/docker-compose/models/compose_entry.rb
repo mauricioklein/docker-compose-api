@@ -1,12 +1,12 @@
 require 'docker'
 
 class ComposeEntry
+  attr_accessor :id, :build, :ports, :command, :baseImage, :tag, :dockerImage, :dockerContainer
+
   def initialize(hash_attributes)
     @id      = hash_attributes['id'     ]
     @build   = hash_attributes['build'  ]
     @ports   = hash_attributes['ports'  ]
-    @volumes = hash_attributes['volumes']
-    @links   = hash_attributes['links'  ]
     @command = hash_attributes['command']
 
     # Split image in baseImage and Tag
@@ -31,12 +31,9 @@ class ComposeEntry
 
     @dockerImage = nil
     @dockerContainer = nil
-
-    self.prepareImage
-    self.prepareContainer
   end
 
-  protected
+  public
     def prepareImage
       unless @baseImage.nil?
         puts "Downloading image: #{@baseImage}:#{@tag}"
@@ -59,7 +56,6 @@ class ComposeEntry
                          )
     end
 
-  public
     def start
       @dockerContainer.start unless @dockerContainer.nil?
     end

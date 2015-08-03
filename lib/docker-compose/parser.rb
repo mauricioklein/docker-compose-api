@@ -20,8 +20,6 @@ module DockerCompose::Parser
         'build'   => entry[1]['build'],
         'image'   => entry[1]['image'],
         'ports'   => entry[1]['ports'],
-        'volumes' => entry[1]['volumes'],
-        'links'   => entry[1]['links'],
         'command' => entry[1]['command']
       }
       puts "Entry: #{attr_hash.inspect}"
