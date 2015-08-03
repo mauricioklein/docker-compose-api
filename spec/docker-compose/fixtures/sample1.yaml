@@ -1,10 +1,12 @@
-web:
-  build: .
+ubuntu:
+  image: ubuntu
   ports:
-   - "5000:5000"
-  volumes:
-   - .:/code
+    - "5000:5000"
   links:
-   - redis
+    - redis
+  command: sleep 100000
+
 redis:
-  image: redis
+  image: redis:2
+  ports:
+    - "6000"
