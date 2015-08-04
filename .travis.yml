@@ -1,8 +1,22 @@
 language: ruby
-install:
-  - sudo sh -c "wget -qO- https://get.docker.com/ | sh"
-  - sudo mkdir -p /var/lib/docker
-  - echo exit 101 | sudo tee /usr/sbin/policy-rc.d
-  - sudo chmod +x /usr/sbin/policy-rc.d
-rvm:
+
+sudo: required
+
+dist: trusty
+
+services:
+  - docker
+
+script:
+  - docker info
+  - docker version
+  - df -kh
+  - bundle install
+  - docker pull redis
+  - docker run -d redis
+  - docker ps
+  - docker stop $(docker ps -q)
+  - docker ps
+
+rvm: 
   - 2.2.0
