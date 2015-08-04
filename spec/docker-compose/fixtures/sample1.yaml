@@ -1,12 +1,12 @@
 ubuntu:
   image: ubuntu
-  ports:
-    - "5000:5000"
+  expose:
+    - "5000"
   links:
     - redis
   command: sleep 100000
 
 redis:
   image: redis:2
-  ports:
+  expose:
     - "6000"
