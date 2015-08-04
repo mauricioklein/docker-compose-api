@@ -5,5 +5,5 @@ install:
   - echo exit 101 | sudo tee /usr/sbin/policy-rc.d
   - sudo chmod +x /usr/sbin/policy-rc.d
   - bundle install
-rvm:
+rvm: 
   - 2.2.0
