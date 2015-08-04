@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/mauricioklein/docker-compose-api.svg?branch=develop)](https://travis-ci.org/mauricioklein/docker-compose-api)
 
-# Docker::Compose::Api
+# Docker Compose Api
 
 DockerCompose provides an easy way to parse docker compose files and lift the whole environment easily.
 
