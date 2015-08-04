@@ -8,5 +8,6 @@ install:
   - sudo chmod +x /usr/sbin/policy-rc.d
   - sudo apt-get install -y slirp lxc lxc-docker aufs-tools cgroup-lite
   - curl -sLo linux https://github.com/jpetazzo/sekexe/raw/master/uml
+  - bundle install
 rvm: 
   - 2.2.0
