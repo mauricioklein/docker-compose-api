@@ -33,7 +33,7 @@ DockerCompose.stopContainers
 # ...or specific containers by their labels
 DockerCompose.stopContainers(['label 1','label 2','label 3',...])
 
-# docker-compose-api is built upon [swipely/docker-client][http://github.com/swipely/docker-api].
+# docker-compose-api is built upon [swipely/docker-client](http://github.com/swipely/docker-api).
 # You can access Docker client anytime
 DockerCompose.getDockerClient
 ```
