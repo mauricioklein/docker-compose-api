@@ -54,7 +54,7 @@ class ComposeEntry
     end
 
     def stop
-      @dockerContainer.stop unless @dockerContainer.nil?
+      @dockerContainer.kill unless @dockerContainer.nil?
     end
 
     def kill
