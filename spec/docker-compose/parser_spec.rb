@@ -17,12 +17,14 @@ describe DockerCompose do
     # Start containers
     DockerCompose.startContainers
     DockerCompose.containers.values.each do |container|
+      container.dockerContainer.logs(stdout: true)
       expect(container.dockerContainer.json['State']['Running']).to be true
     end
 
     # Stop containers
     DockerCompose.stopContainers
     DockerCompose.containers.values.each do |container|
+      container.dockerContainer.logs(stdout: true)
       expect(container.dockerContainer.json['State']['Running']).to be false
     end
   end
