@@ -12,11 +12,7 @@ script:
   - docker version
   - df -kh
   - bundle install
-  - docker pull redis
-  - docker run -d redis
-  - docker ps
-  - docker stop $(docker ps -q)
-  - docker ps
+  - bundle exec rake
 
 rvm: 
   - 2.2.0

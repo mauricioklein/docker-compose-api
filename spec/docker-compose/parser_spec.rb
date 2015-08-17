@@ -14,32 +14,32 @@ describe DockerCompose do
   end
 
   it 'should start/stop all containers' do
-    # Start containers
-    puts 'STARTING CONTAINER SPEC...'
+    # Start containers to test Stop
     DockerCompose.startContainers
     DockerCompose.containers.values.each do |container|
-      puts "Inspect after start: #{container.dockerContainer.json.to_s}"
       expect(container.dockerContainer.json['State']['Running']).to be true
     end
 
-    puts "Check now!!!"
-    sleep 10
-
-    puts "RUNNING CONTAINERS BEFORE STOP: #{DockerCompose.getDockerClient::Container.all()}"
-
     # Stop containers
-    puts 'STOPING CONTAINER SPEC (sleep 20s)...'
     DockerCompose.stopContainers
-    sleep 60
-    puts 'Finished sleep'
-    puts "RUNNING CONTAINERS AFTER STOP: #{DockerCompose.getDockerClient::Container.all()}"
     DockerCompose.containers.values.each do |container|
-      puts "Inspect after stop: #{container.dockerContainer.json.to_s}"
+      expect(container.dockerContainer.json['State']['Running']).to be false
+    end
+
+    # Start containers to test Kill
+    DockerCompose.startContainers
+    DockerCompose.containers.values.each do |container|
+      expect(container.dockerContainer.json['State']['Running']).to be true
+    end
+
+    # Kill containers
+    DockerCompose.killContainers
+    DockerCompose.containers.values.each do |container|
       expect(container.dockerContainer.json['State']['Running']).to be false
     end
   end
 
-  it 'should start/stop a single container' do
+  it 'should start/stop/kill a single container' do
     firstContainer = DockerCompose.containers.keys.first
     lastContainer  = DockerCompose.containers.keys.last
 
@@ -48,8 +48,18 @@ describe DockerCompose do
     expect(DockerCompose.containers[firstContainer].dockerContainer.json['State']['Running']).to be true
     expect(DockerCompose.containers[lastContainer ].dockerContainer.json['State']['Running']).to be false
 
-    # Stop containers
+    # Stop container
     DockerCompose.stopContainers([firstContainer])
+    expect(DockerCompose.containers[firstContainer].dockerContainer.json['State']['Running']).to be false
+    expect(DockerCompose.containers[lastContainer ].dockerContainer.json['State']['Running']).to be false
+
+    # Start another container
+    DockerCompose.startContainers([lastContainer])
+    expect(DockerCompose.containers[firstContainer].dockerContainer.json['State']['Running']).to be false
+    expect(DockerCompose.containers[lastContainer ].dockerContainer.json['State']['Running']).to be true
+
+    # Kill container
+    DockerCompose.killContainers([lastContainer])
     expect(DockerCompose.containers[firstContainer].dockerContainer.json['State']['Running']).to be false
     expect(DockerCompose.containers[lastContainer ].dockerContainer.json['State']['Running']).to be false
   end

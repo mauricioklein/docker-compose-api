@@ -29,7 +29,6 @@ module DockerCompose
       composeEntry.prepareImage
       composeEntry.prepareContainer
       @entries[attr_hash['label']] = composeEntry
-      #@entries.merge({:attr_hash['label'] => composeEntry})
     end
   end
 
@@ -45,7 +44,7 @@ module DockerCompose
     ids.each do |id|
       if @entries.has_key?(id)
         puts "Starting container: #{id}"
-        puts @entries[id].start
+        @entries[id].start
       else
         puts "Container '#{id}' not found!"
       end
@@ -60,7 +59,22 @@ module DockerCompose
     ids.each do |id|
       if @entries.has_key?(id)
         puts "Stoping container: #{id}"
-        puts @entries[id].stop
+        @entries[id].stop
+      else
+        puts "Container '#{id}' not found!"
+      end
+    end
+  end
+
+  def self.killContainers(ids = [])
+    if ids.empty?
+      ids = @entries.keys
+    end
+
+    ids.each do |id|
+      if @entries.has_key?(id)
+        puts "Killing container: #{id}"
+        @entries[id].kill
       else
         puts "Container '#{id}' not found!"
       end
