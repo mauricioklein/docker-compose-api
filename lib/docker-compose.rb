@@ -45,7 +45,7 @@ module DockerCompose
     ids.each do |id|
       if @entries.has_key?(id)
         puts "Starting container: #{id}"
-        @entries[id].start
+        puts @entries[id].start
       else
         puts "Container '#{id}' not found!"
       end
@@ -60,7 +60,7 @@ module DockerCompose
     ids.each do |id|
       if @entries.has_key?(id)
         puts "Stoping container: #{id}"
-        @entries[id].stop
+        puts @entries[id].stop
       else
         puts "Container '#{id}' not found!"
       end
