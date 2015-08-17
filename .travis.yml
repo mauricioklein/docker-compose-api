@@ -1,11 +1,24 @@
 language: ruby
+
 sudo: required
+
+dist: trusty
+
+env:
+  matrix:
+    - SUITE=containers
+    - SUITE=images
+    - SUITE=docker-misc
+    - SUITE=git
+
 install:
   - bundle install
+
 script:
   - docker info
   - docker version
   - df -kh
   - bundle exec rspec
+
 rvm: 
   - 2.2.0
