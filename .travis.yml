@@ -12,7 +12,7 @@ script:
   - docker version
   - df -kh
   - bundle install
-  - bundle exec rspec
+  - bundle exec rake
 
 rvm: 
   - 2.2.0
