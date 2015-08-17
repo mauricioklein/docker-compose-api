@@ -23,8 +23,10 @@ describe DockerCompose do
     end
 
     # Stop containers
-    puts 'STOPING CONTAINER SPEC...'
+    puts 'STOPING CONTAINER SPEC (sleep 20s)...'
     DockerCompose.stopContainers
+    sleep 20
+    puts 'Finished sleep'
     DockerCompose.containers.values.each do |container|
       puts "Inspect after stop: #{container.dockerContainer.json.to_s}"
       expect(container.dockerContainer.json['State']['Running']).to be false
