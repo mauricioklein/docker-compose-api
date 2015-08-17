@@ -11,13 +11,11 @@ env:
     - SUITE=docker-misc
     - SUITE=git
 
-install:
-  - bundle install
-
 script:
   - docker info
   - docker version
   - df -kh
+  - bundle install
   - bundle exec rspec
 
 rvm: 
