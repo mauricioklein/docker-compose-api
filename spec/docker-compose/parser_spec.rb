@@ -15,16 +15,18 @@ describe DockerCompose do
 
   it 'should start/stop all containers' do
     # Start containers
+    puts 'STARTING CONTAINER SPEC...'
     DockerCompose.startContainers
     DockerCompose.containers.values.each do |container|
-      container.dockerContainer.logs(stdout: true)
+      puts "Inspect after start: #{container.dockerContainer.json.to_s}"
       expect(container.dockerContainer.json['State']['Running']).to be true
     end
 
     # Stop containers
+    puts 'STOPING CONTAINER SPEC...'
     DockerCompose.stopContainers
     DockerCompose.containers.values.each do |container|
-      container.dockerContainer.logs(stdout: true)
+      puts "Inspect after stop: #{container.dockerContainer.json.to_s}"
       expect(container.dockerContainer.json['State']['Running']).to be false
     end
   end
