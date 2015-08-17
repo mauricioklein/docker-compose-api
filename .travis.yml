@@ -4,12 +4,6 @@ sudo: required
 
 dist: trusty
 
-env:
-  matrix:
-    - SUITE=containers
-    - SUITE=images
-    - SUITE=docker-misc
-    - SUITE=git
 
 script:
   - docker info
