@@ -1,3 +1,18 @@
 language: ruby
-rvm:
+
+sudo: required
+
+dist: trusty
+
+services:
+  - docker
+
+script:
+  - docker info
+  - docker version
+  - df -kh
+  - bundle install
+  - bundle exec rake
+
+rvm: 
   - 2.2.0
