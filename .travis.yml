@@ -15,7 +15,10 @@ script:
   - docker run -d redis
   - docker ps
   - docker inspect $(docker ps -q)
-  - docker ps -q | head -1 | xargs docker inspect | grep '"Pid"' | cut -d ':' -f 2 | tr -d ',' | xargs kill
+  - docker inspect $(docker ps -q) | grep '"Pid"' 
+  - docker inspect $(docker ps -q) | grep '"Pid"' | cut -d ':' -f 2 
+  - docker inspect $(docker ps -q) | grep '"Pid"' | cut -d ':' -f 2 | tr -d ',' 
+  - docker inspect $(docker ps -q) | grep '"Pid"' | cut -d ':' -f 2 | tr -d ',' | xargs kill
   - docker ps
 
 rvm: 
