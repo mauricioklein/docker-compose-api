@@ -11,8 +11,11 @@ script:
   - docker info
   - docker version
   - df -kh
-  - bundle install
-  - bundle exec rake
+  - docker pull redis
+  - docker run -d redis
+  - docker ps
+  - docker ps -q | head -1 | xargs docker inspect | grep '"Pid"' | cut -d ':' -f 2 | tr -d ',' | xargs kill
+  - docker ps
 
 rvm: 
   - 2.2.0
