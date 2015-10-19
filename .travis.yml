@@ -10,12 +10,8 @@ dist: trusty
 services:
   - docker
 
+install:
+  - bundle install
+
 script:
-  - docker info
-  - docker version
-  - df -kh
-  - docker pull redis
-  - docker run -d redis
-  - docker ps
-  - docker stop $(docker ps -q)
-  - docker ps
+  - bundle exec rspec
