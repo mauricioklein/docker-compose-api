@@ -1,68 +1,89 @@
 require 'docker'
 
 class ComposeEntry
-  attr_accessor :label, :build, :expose, :command, :baseImage, :tag, :dockerImage, :dockerContainer
+  attr_reader :compose_attributes, :base_image, :container
 
   def initialize(hash_attributes)
-    @label   = hash_attributes['label'  ]
-    @build   = hash_attributes['build'  ]
-    @command = hash_attributes['command']
+    @compose_attributes = {
+      image: hash_attributes[:image],
+      build: hash_attributes[:build],
+      links: hash_attributes[:links],
+      ports: hash_attributes[:ports],
+      expose: hash_attributes[:expose],
+      volumes: hash_attributes[:volumes],
+      command: hash_attributes[:command],
+      environment: hash_attributes[:environment]
+    }.reject{ |key, value| value.nil? }
 
-    # Split image in baseImage and Tag
-    unless hash_attributes['image'].nil?
-      image_split = hash_attributes['image'].split(':')
-      @baseImage = image_split[0]
-      @tag = image_split[1] || 'latest'
+    # Docker client variables
+    @base_image = nil
+    @container = nil
+
+    prepare_image
+    prepare_container
+  end
+
+  private
+
+  #
+  # Download or build an image
+  #
+  def prepare_image
+    has_both = @compose_attributes.key?(:image) && @compose_attributes.key?(:build)
+    has_none = !@compose_attributes.key?(:image) && !@compose_attributes.key?(:build)
+
+    if has_both
+      raise ArgumentError.new('Docker compose should provide Image OR Build command, not both')
+    elsif has_none
+      raise ArgumentError.new('No Image or Build command provided')
     end
 
-    unless @command.nil?
-      @command = @command.split(' ')
+    # Build or Download image
+    if compose_attributes.key?(:image)
+      puts "Downloading image: #{compose_attributes[:image]}"
+      base_image = Docker::Image.create('fromImage' => compose_attributes[:image])
+    else
+      puts "Building image from: #{compose_attributes[:build]}"
+      base_image = Docker::Image.build_from_dir(compose_attributes[:build])
     end
-
-    @expose = Hash.new
-    unless hash_attributes['expose'].nil?
-      hash_attributes['expose'].each do |port|
-        @expose[port] = {}
-      end
-    end
-
-    @dockerImage = nil
-    @dockerContainer = nil
   end
 
   public
-    def prepareImage
-      unless @baseImage.nil?
-        puts("Downloading image: #{@baseImage}:#{@tag}")
-        @dockerImage = Docker::Image.create('fromImage' => @baseImage, 'tag' => @tag)
-      end
 
-      unless @build.nil?
-        puts("Building image from dir: #{@build}")
-        @dockerImage = Docker::Image.build_from_dir(@build)
-      end
-    end
+  #
+  # Start a new container with parameters informed in object construction
+  # (TODO: start container from a Dockerfile)
+  #
+  def prepare_container
+    container_config = {
+      Image: @compose_attributes[:image],
+      Cmd: @compose_attributes[:command],
+      Env: @compose_attributes[:environment],
+      Volumes: @compose_attributes[:volumes],
+      ExposedPorts: @compose_attributes[:expose],
+      HostConfig: {
+        #Links: @compose_attributes[:links],
+        PortBindings: @compose_attributes[:ports]
+      }
+    }
 
-    # TODO: build container from local image
-    def prepareContainer
-      puts("Preparing container: BaseImage: #{@baseImage}, Tag: #{@tag}, Expose: #{@expose}, Cmd: #{@command}")
-      @dockerContainer = Docker::Container.create('Image' => "#{@baseImage}:#{@tag}", 'Cmd' => @command, 'ExposedPorts' => @expose)
-    end
+    @container = Docker::Container.create(container_config)
+  end
 
-    def start
-      @dockerContainer.start unless @dockerContainer.nil?
-    end
+  def start
+    @container.start unless @container.nil?
+  end
 
-    def stop
-      @dockerContainer.kill unless @dockerContainer.nil?
-    end
+  def stop
+    @container.kill unless @container.nil?
+  end
 
-    def kill
-      @dockerContainer.kill unless @dockerContainer.nil?
-    end
+  def kill
+    @container.kill unless @container.nil?
+  end
 
-    def delete
-      @dockerContainer.delete(:force => true) unless @dockerContainer.nil?
-      @dockerContainer = nil
-    end
+  def delete
+    @container.delete(:force => true) unless @container.nil?
+    @container = nil
+  end
 end

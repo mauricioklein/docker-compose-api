@@ -4,45 +4,68 @@ describe ComposeEntry do
   context 'Object creation' do
     it 'should prepare the attributes correctly' do
       attributes = {
-          'label'   => 'CONTAINER_LABEL',
-          'build'   => 'BUILD',
-          'image'   => 'IMAGENAME:TAGNAME',
-          'expose'  => ["1000", "2000"],
-          'command' => "CMD0 CMD1 CMD2"
+        image: 'ubuntu:latest',
+        links: ['links:links'],
+        ports: {'22/tcp' => [{'HostPort' => '12345'}]},
+        expose: {'22/tcp' => {}},
+        volumes: {'/tmp' => {}},
+        command: ['ps', 'aux'],
+        environment: ['ENVIRONMENT']
       }
 
       entry = ComposeEntry.new(attributes)
 
-      expect(entry.label).to eq('CONTAINER_LABEL')
-      expect(entry.build).to eq('BUILD')
-      expect(entry.baseImage).to eq('IMAGENAME')
-      expect(entry.tag).to eq('TAGNAME')
-      expect(entry.expose.length).to eq(2)
-        expect(entry.expose.keys[0]).to eq('1000')
-        expect(entry.expose.keys[1]).to eq('2000')
-      expect(entry.command.length).to eq(3)
-        expect(entry.command[0]).to eq('CMD0')
-        expect(entry.command[1]).to eq('CMD1')
-        expect(entry.command[2]).to eq('CMD2')
+      expect(entry.compose_attributes).to eq(attributes)
     end
 
-    it 'should set tag to latest when not informed' do
+    it 'should not accept both image and build commands on the same compose entry' do
       attributes = {
-          'label'   => 'CONTAINER_LABEL',
-          'build'   => 'BUILD',
-          'image'   => 'IMAGENAME',
-          'expose'  => ["1000", "2000"],
-          'command' => "CMD0 CMD1 CMD2"
+        image: 'ubuntu:latest',
+        build: '.',
+        links: ['links:links'],
+        ports: {'22/tcp' => [{'HostPort' => '12345'}]},
+        expose: {'22/tcp' => {}},
+        volumes: {'/tmp' => {}},
+        command: ['ps', 'aux'],
+        environment: ['ENVIRONMENT']
+      }
+
+      expect{ComposeEntry.new(attributes)}.to raise_error(ArgumentError)
+    end
+
+    it 'should not accept compose entry without either image and build commands' do
+      attributes = {
+        links: ['links:links'],
+        ports: {'22/tcp' => [{'HostPort' => '12345'}]},
+        expose: {'22/tcp' => {}},
+        volumes: {'/tmp' => {}},
+        command: ['ps', 'aux'],
+        environment: ['ENVIRONMENT']
+      }
+
+      expect{ComposeEntry.new(attributes)}.to raise_error(ArgumentError)
+    end
+
+    it 'should start and stop a container' do
+      attributes = {
+        image: 'ubuntu:latest',
+        links: ['links:links'],
+        ports: {'22/tcp' => [{'HostPort' => '12345'}]},
+        expose: {'22/tcp' => {}},
+        volumes: {'/tmp' => {}},
+        command: ['ps', 'aux'],
+        environment: ['ENVIRONMENT']
       }
 
       entry = ComposeEntry.new(attributes)
 
-      expect(entry.tag).to eq('latest')
-    end
+      #Start container
+      entry.start
+      expect(entry.container.json['State']['Running']).to be true
 
-    it 'should not break when trying to start/stop a nil container' do
-      ComposeEntry.new({}).start
-      ComposeEntry.new({}).stop
+      # Stop container
+      entry.stop
+      expect(entry.container.json['State']['Running']).to be false
     end
   end
 end
