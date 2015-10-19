@@ -10,11 +10,6 @@ dist: trusty
 services:
   - docker
 
-install:
-  - sudo apt-get -y update
-  - sudo apt-get -y install apparmor-utils
-  - sudo aa-complain /etc/apparmor.d/docker
-
 script:
   - docker info
   - docker version
