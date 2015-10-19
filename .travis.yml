@@ -17,10 +17,5 @@ script:
   - docker pull redis
   - docker run -d redis
   - docker ps
-  - docker inspect $(docker ps -q)
-  - docker inspect $(docker ps -q) | grep '"Pid"' 
-  - docker inspect $(docker ps -q) | grep '"Pid"' | cut -d ':' -f 2 
-  - docker inspect $(docker ps -q) | grep '"Pid"' | cut -d ':' -f 2 | tr -d ',' 
-  - docker inspect $(docker ps -q) | grep '"Pid"' | cut -d ':' -f 2 | tr -d ',' | xargs kill
+  - docker stop $(docker ps -q)
   - docker ps
-
