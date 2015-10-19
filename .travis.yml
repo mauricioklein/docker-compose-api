@@ -1,11 +1,19 @@
 language: ruby
 
+rvm: 
+  - 2.2.0
+
 sudo: required
 
 dist: trusty
 
 services:
   - docker
+
+install:
+  - sudo apt-get -y update
+  - sudo apt-get -y install apparmor-utils
+  - sudo aa-complain /etc/apparmor.d/docker
 
 script:
   - docker info
@@ -21,5 +29,3 @@ script:
   - docker inspect $(docker ps -q) | grep '"Pid"' | cut -d ':' -f 2 | tr -d ',' | xargs kill
   - docker ps
 
-rvm: 
-  - 2.2.0
