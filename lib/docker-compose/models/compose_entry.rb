@@ -1,17 +1,19 @@
 require 'docker'
+require 'docker-compose/utils/compose_utils'
 
 class ComposeEntry
   attr_reader :compose_attributes, :base_image, :container
 
   def initialize(hash_attributes)
     @compose_attributes = {
-      image: hash_attributes[:image],
+      label: hash_attributes[:label],
+      image: ComposeUtils.format_image(hash_attributes[:image]),
       build: hash_attributes[:build],
       links: hash_attributes[:links],
-      ports: hash_attributes[:ports],
-      expose: hash_attributes[:expose],
+      #ports: hash_attributes[:ports],
+      #expose: hash_attributes[:expose],
       volumes: hash_attributes[:volumes],
-      command: hash_attributes[:command],
+      command: ComposeUtils.format_command(hash_attributes[:command]),
       environment: hash_attributes[:environment]
     }.reject{ |key, value| value.nil? }
 
@@ -38,11 +40,11 @@ class ComposeEntry
       raise ArgumentError.new('No Image or Build command provided')
     end
 
-    # Build or Download image
+    # Build or pull image
     if compose_attributes.key?(:image)
-      puts "Downloading image: #{compose_attributes[:image]}"
+      puts "Pulling image: #{compose_attributes[:image]}"
       base_image = Docker::Image.create('fromImage' => compose_attributes[:image])
-    else
+    elsif compose_attributes.key?(:build)
       puts "Building image from: #{compose_attributes[:build]}"
       base_image = Docker::Image.build_from_dir(compose_attributes[:build])
     end
@@ -60,10 +62,10 @@ class ComposeEntry
       Cmd: @compose_attributes[:command],
       Env: @compose_attributes[:environment],
       Volumes: @compose_attributes[:volumes],
-      ExposedPorts: @compose_attributes[:expose],
+      #ExposedPorts: @compose_attributes[:expose],
       HostConfig: {
         #Links: @compose_attributes[:links],
-        PortBindings: @compose_attributes[:ports]
+        #PortBindings: @compose_attributes[:ports]
       }
     }
 

@@ -6,16 +6,18 @@ describe ComposeEntry do
       attributes = {
         image: 'ubuntu:latest',
         links: ['links:links'],
-        ports: {'22/tcp' => [{'HostPort' => '12345'}]},
-        expose: {'22/tcp' => {}},
         volumes: {'/tmp' => {}},
-        command: ['ps', 'aux'],
+        command: 'ps aux',
         environment: ['ENVIRONMENT']
       }
 
       entry = ComposeEntry.new(attributes)
 
-      expect(entry.compose_attributes).to eq(attributes)
+      expect(entry.compose_attributes[:image]).to eq(attributes[:image])
+      expect(entry.compose_attributes[:links]).to eq(attributes[:links])
+      expect(entry.compose_attributes[:volumes]).to eq(attributes[:volumes])
+      expect(entry.compose_attributes[:command]).to eq(attributes[:command].split(' '))
+      expect(entry.compose_attributes[:environment]).to eq(attributes[:environment])
     end
 
     it 'should not accept both image and build commands on the same compose entry' do
@@ -23,10 +25,8 @@ describe ComposeEntry do
         image: 'ubuntu:latest',
         build: '.',
         links: ['links:links'],
-        ports: {'22/tcp' => [{'HostPort' => '12345'}]},
-        expose: {'22/tcp' => {}},
         volumes: {'/tmp' => {}},
-        command: ['ps', 'aux'],
+        command: 'ps aux',
         environment: ['ENVIRONMENT']
       }
 
@@ -36,10 +36,8 @@ describe ComposeEntry do
     it 'should not accept compose entry without either image and build commands' do
       attributes = {
         links: ['links:links'],
-        ports: {'22/tcp' => [{'HostPort' => '12345'}]},
-        expose: {'22/tcp' => {}},
         volumes: {'/tmp' => {}},
-        command: ['ps', 'aux'],
+        command: 'ps aux',
         environment: ['ENVIRONMENT']
       }
 
@@ -50,10 +48,8 @@ describe ComposeEntry do
       attributes = {
         image: 'ubuntu:latest',
         links: ['links:links'],
-        ports: {'22/tcp' => [{'HostPort' => '12345'}]},
-        expose: {'22/tcp' => {}},
         volumes: {'/tmp' => {}},
-        command: ['ps', 'aux'],
+        command: 'ps aux',
         environment: ['ENVIRONMENT']
       }
 

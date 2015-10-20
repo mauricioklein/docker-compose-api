@@ -4,9 +4,9 @@ ubuntu:
     - "5000"
   links:
     - redis
-  command: sleep 100000
+  command: /bin/sleep 60
 
 redis:
-  image: redis:2
+  image: redis
   expose:
     - "6000"
