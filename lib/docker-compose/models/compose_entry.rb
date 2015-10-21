@@ -1,5 +1,6 @@
 require 'docker'
-require 'docker-compose/utils/compose_utils'
+require_relative 'compose_port'
+require_relative '../utils/compose_utils'
 
 class ComposeEntry
   attr_reader :compose_attributes, :base_image, :container
@@ -10,7 +11,7 @@ class ComposeEntry
       image: ComposeUtils.format_image(hash_attributes[:image]),
       build: hash_attributes[:build],
       links: hash_attributes[:links],
-      #ports: hash_attributes[:ports],
+      ports: prepare_ports(hash_attributes[:ports]),
       #expose: hash_attributes[:expose],
       volumes: hash_attributes[:volumes],
       command: ComposeUtils.format_command(hash_attributes[:command]),
@@ -42,35 +43,66 @@ class ComposeEntry
 
     # Build or pull image
     if compose_attributes.key?(:image)
-      puts "Pulling image: #{compose_attributes[:image]}"
+      #puts "Pulling image: #{compose_attributes[:image]}"
       base_image = Docker::Image.create('fromImage' => compose_attributes[:image])
     elsif compose_attributes.key?(:build)
-      puts "Building image from: #{compose_attributes[:build]}"
+      #puts "Building image from: #{compose_attributes[:build]}"
       base_image = Docker::Image.build_from_dir(compose_attributes[:build])
     end
   end
-
-  public
 
   #
   # Start a new container with parameters informed in object construction
   # (TODO: start container from a Dockerfile)
   #
   def prepare_container
+    exposed_ports = {}
+    port_bindings = {}
+
+    if !@compose_attributes[:ports].nil?
+      @compose_attributes[:ports].each do |port|
+        exposed_ports["#{port.container_port}/tcp"] = {}
+        port_bindings["#{port.container_port}/tcp"] = [{
+          "HostIp" => port.host_ip || '',
+          "HostPort" => port.host_port || ''
+        }]
+      end
+    end
+
     container_config = {
       Image: @compose_attributes[:image],
       Cmd: @compose_attributes[:command],
       Env: @compose_attributes[:environment],
       Volumes: @compose_attributes[:volumes],
-      #ExposedPorts: @compose_attributes[:expose],
+      ExposedPorts: exposed_ports,
       HostConfig: {
         #Links: @compose_attributes[:links],
-        #PortBindings: @compose_attributes[:ports]
+        PortBindings: port_bindings
       }
     }
 
     @container = Docker::Container.create(container_config)
   end
+
+  #
+  # Process each port entry in docker compose file and
+  # create structure recognized by docker client
+  #
+  def prepare_ports(port_entries)
+    ports = []
+
+    if port_entries.nil?
+      return nil
+    end
+
+    port_entries.each do |port_entry|
+      ports.push(ComposeUtils.format_port(port_entry))
+    end
+
+    ports
+  end
+
+  public
 
   def start
     @container.start unless @container.nil?

@@ -64,6 +64,30 @@ describe DockerCompose do
     expect(DockerCompose.entries(last_entry).container.json['State']['Running']).to be false
   end
 
+  it 'should assign ports' do
+    ubuntu = DockerCompose.entries.first
+
+    # Start container
+    ubuntu.start
+
+    port_bindings = ubuntu.container.json['HostConfig']['PortBindings']
+    exposed_ports = ubuntu.container.json['Config']['ExposedPorts']
+
+    # Check port bindings
+    expect(port_bindings.length).to eq(3)
+    expect(port_bindings.key?('3000/tcp')).to be true
+    expect(port_bindings.key?('8000/tcp')).to be true
+    expect(port_bindings.key?('8001/tcp')).to be true
+
+    # Check exposed ports
+    expect(exposed_ports.key?('3000/tcp')).to be true
+    expect(exposed_ports.key?('8000/tcp')).to be true
+    expect(exposed_ports.key?('8001/tcp')).to be true
+
+    # Stop container
+    ubuntu.stop
+  end
+
   after(:all) do
     DockerCompose.entries.each do |entry|
       entry.container.delete

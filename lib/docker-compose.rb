@@ -30,6 +30,7 @@ module DockerCompose
         image: entry[1]['image'],
         build: entry[1]['build'],
         links: entry[1]['links'],
+        ports: entry[1]['ports'],
         volumes: entry[1]['volumes'],
         command: entry[1]['command'],
         environment: entry[1]['environment']
@@ -99,13 +100,13 @@ module DockerCompose
 
     entries.values.each do |entry|
       if method == 'start'
-        puts "Starting container: #{entry.compose_attributes[:label]}"
+        #puts "Starting container: #{entry.compose_attributes[:label]}"
         entry.start
       elsif method == 'stop'
-        puts "Stopping container: #{entry.compose_attributes[:label]}"
+        #puts "Stopping container: #{entry.compose_attributes[:label]}"
         entry.stop
       elsif method == 'kill'
-        puts "Killing container: #{entry.compose_attributes[:label]}"
+        #puts "Killing container: #{entry.compose_attributes[:label]}"
         entry.kill
       end
     end

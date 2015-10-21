@@ -6,6 +6,7 @@ describe ComposeEntry do
       attributes = {
         image: 'ubuntu:latest',
         links: ['links:links'],
+        ports: ['3000', '8000:8000', '127.0.0.1:8001:8001'],
         volumes: {'/tmp' => {}},
         command: 'ps aux',
         environment: ['ENVIRONMENT']
@@ -18,6 +19,27 @@ describe ComposeEntry do
       expect(entry.compose_attributes[:volumes]).to eq(attributes[:volumes])
       expect(entry.compose_attributes[:command]).to eq(attributes[:command].split(' '))
       expect(entry.compose_attributes[:environment]).to eq(attributes[:environment])
+
+      # Check ports structure
+      expect(entry.compose_attributes[:ports].length).to eq(attributes[:ports].length)
+
+      # Port 1: '3000'
+      port_entry = entry.compose_attributes[:ports][0]
+      expect(port_entry.container_port).to eq('3000')
+      expect(port_entry.host_ip).to eq(nil)
+      expect(port_entry.host_port).to eq(nil)
+
+      # Port 2: '8000:8000'
+      port_entry = entry.compose_attributes[:ports][1]
+      expect(port_entry.container_port).to eq('8000')
+      expect(port_entry.host_ip).to eq(nil)
+      expect(port_entry.host_port).to eq('8000')
+
+      # Port 3: '127.0.0.1:8001:8001'
+      port_entry = entry.compose_attributes[:ports][2]
+      expect(port_entry.container_port).to eq('8001')
+      expect(port_entry.host_ip).to eq('127.0.0.1')
+      expect(port_entry.host_port).to eq('8001')
     end
 
     it 'should not accept both image and build commands on the same compose entry' do
