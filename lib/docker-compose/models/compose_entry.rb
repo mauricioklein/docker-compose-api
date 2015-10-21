@@ -42,12 +42,14 @@ class ComposeEntry
     end
 
     # Build or pull image
-    if compose_attributes.key?(:image)
-      #puts "Pulling image: #{compose_attributes[:image]}"
-      base_image = Docker::Image.create('fromImage' => compose_attributes[:image])
-    elsif compose_attributes.key?(:build)
-      #puts "Building image from: #{compose_attributes[:build]}"
-      base_image = Docker::Image.build_from_dir(compose_attributes[:build])
+    if @compose_attributes.key?(:image)
+      if image_exists
+        base_image = Docker::Image.get(@compose_attributes[:image])
+      else
+        base_image = Docker::Image.create('fromImage' => @compose_attributes[:image])
+      end
+    elsif @compose_attributes.key?(:build)
+      base_image = Docker::Image.build_from_dir(@compose_attributes[:build])
     end
   end
 
@@ -100,6 +102,13 @@ class ComposeEntry
     end
 
     ports
+  end
+
+  #
+  # Check if a given image already exists in host
+  #
+  def image_exists
+    Docker::Image.exist?(@compose_attributes[:image])
   end
 
   public

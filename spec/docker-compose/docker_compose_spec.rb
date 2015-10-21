@@ -6,7 +6,7 @@ describe DockerCompose do
   end
 
   it 'should be able to access Docker client' do
-    expect(DockerCompose.getDockerClient.version).to_not be_nil
+    expect(DockerCompose.docker_client).to_not be_nil
   end
 
   it 'should read a YAML file correctly' do
@@ -15,25 +15,25 @@ describe DockerCompose do
 
   it 'should start/stop all containers' do
     # Start containers to test Stop
-    DockerCompose.start_containers
+    DockerCompose.start
     DockerCompose.entries.each do |entry|
       expect(entry.container.json['State']['Running']).to be true
     end
 
     # Stop containers
-    DockerCompose.stop_containers
+    DockerCompose.stop
     DockerCompose.entries.each do |entry|
       expect(entry.container.json['State']['Running']).to be false
     end
 
     # Start containers to test Kill
-    DockerCompose.start_containers
+    DockerCompose.start
     DockerCompose.entries.each do |entry|
       expect(entry.container.json['State']['Running']).to be true
     end
 
     # Kill containers
-    DockerCompose.kill_containers
+    DockerCompose.kill
     DockerCompose.entries.each do |entry|
       expect(entry.container.json['State']['Running']).to be false
     end
@@ -44,22 +44,22 @@ describe DockerCompose do
     last_entry  = DockerCompose.entries.last.compose_attributes[:label]
 
     # Start a single container
-    DockerCompose.start_containers([first_entry])
+    DockerCompose.start([first_entry])
     expect(DockerCompose.entries(first_entry).container.json['State']['Running']).to be true
     expect(DockerCompose.entries(last_entry).container.json['State']['Running']).to be false
 
     # Stop container
-    DockerCompose.stop_containers([first_entry])
+    DockerCompose.stop([first_entry])
     expect(DockerCompose.entries(first_entry).container.json['State']['Running']).to be false
     expect(DockerCompose.entries(last_entry).container.json['State']['Running']).to be false
 
     # Start another container
-    DockerCompose.start_containers([last_entry])
+    DockerCompose.start([last_entry])
     expect(DockerCompose.entries(first_entry).container.json['State']['Running']).to be false
     expect(DockerCompose.entries(last_entry).container.json['State']['Running']).to be true
 
     # Kill container
-    DockerCompose.kill_containers([last_entry])
+    DockerCompose.kill([last_entry])
     expect(DockerCompose.entries(first_entry).container.json['State']['Running']).to be false
     expect(DockerCompose.entries(last_entry).container.json['State']['Running']).to be false
   end

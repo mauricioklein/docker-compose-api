@@ -8,7 +8,7 @@ module DockerCompose
   #
   # Get Docker client object
   #
-  def self.getDockerClient()
+  def self.docker_client
     Docker
   end
 
@@ -62,8 +62,8 @@ module DockerCompose
   # If labels is informed, only those containers with label present in array will be started.
   # Otherwise, all containers are started
   #
-  def self.start_containers(labels = [])
-    self.call_container_method('start', labels)
+  def self.start(labels = [])
+    self.call_container_method(:start, labels)
   end
 
   #
@@ -73,8 +73,8 @@ module DockerCompose
   # If labels is informed, only those containers with label present in array will be stopped.
   # Otherwise, all containers are stopped
   #
-  def self.stop_containers(labels = [])
-    self.call_container_method('stop', labels)
+  def self.stop(labels = [])
+    self.call_container_method(:stop, labels)
   end
 
   #
@@ -84,12 +84,12 @@ module DockerCompose
   # If labels is informed, only those containers with label present in array will be stopped.
   # Otherwise, all containers are stopped
   #
-  def self.kill_containers(labels  = [])
-    self.call_container_method('kill', labels)
+  def self.kill(labels  = [])
+    self.call_container_method(:kill, labels)
   end
 
   private_class_method
-  def self.call_container_method(method = 'stop', labels = [])
+  def self.call_container_method(method, labels = [])
     if labels.empty?
       labels = @entries.keys
     end
@@ -99,16 +99,7 @@ module DockerCompose
     }
 
     entries.values.each do |entry|
-      if method == 'start'
-        #puts "Starting container: #{entry.compose_attributes[:label]}"
-        entry.start
-      elsif method == 'stop'
-        #puts "Stopping container: #{entry.compose_attributes[:label]}"
-        entry.stop
-      elsif method == 'kill'
-        #puts "Killing container: #{entry.compose_attributes[:label]}"
-        entry.kill
-      end
+      entry.send(method)
     end
   end
 end

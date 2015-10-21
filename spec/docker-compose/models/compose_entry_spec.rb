@@ -85,5 +85,23 @@ describe ComposeEntry do
       entry.stop
       expect(entry.container.json['State']['Running']).to be false
     end
+
+    it 'should delete a container' do
+      attributes = {
+        image: 'ubuntu:latest',
+        links: ['links:links'],
+        volumes: {'/tmp' => {}},
+        command: 'ps aux',
+        environment: ['ENVIRONMENT']
+      }
+
+      # Create a container
+      entry = ComposeEntry.new(attributes)
+
+      # Delete the container
+      entry.delete
+
+      expect(entry.container).to be_nil
+    end
   end
 end
