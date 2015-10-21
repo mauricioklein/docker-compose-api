@@ -1,0 +1,17 @@
+language: ruby
+
+rvm: 
+  - 2.2.0
+
+sudo: required
+
+dist: trusty
+
+services:
+  - docker
+
+install:
+  - bundle install
+
+script:
+  - bundle exec rspec
