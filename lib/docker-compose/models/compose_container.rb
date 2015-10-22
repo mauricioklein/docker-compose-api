@@ -3,7 +3,7 @@ require_relative 'compose_port'
 require_relative '../utils/compose_utils'
 
 class ComposeContainer
-  attr_reader :attributes, :base_image, :container, :dependencies
+  attr_reader :attributes, :dependencies
 
   def initialize(hash_attributes)
     @attributes = {
@@ -12,14 +12,12 @@ class ComposeContainer
       build: hash_attributes[:build],
       links: hash_attributes[:links],
       ports: prepare_ports(hash_attributes[:ports]),
-      #expose: hash_attributes[:expose],
       volumes: hash_attributes[:volumes],
       command: ComposeUtils.format_command(hash_attributes[:command]),
       environment: hash_attributes[:environment]
     }.reject{ |key, value| value.nil? }
 
     # Docker client variables
-    @base_image = nil
     @container = nil
     @dependencies = []
   end
@@ -37,12 +35,12 @@ class ComposeContainer
     # Build or pull image
     if @attributes.key?(:image)
       if image_exists
-        base_image = Docker::Image.get(@attributes[:image])
+        Docker::Image.get(@attributes[:image])
       else
-        base_image = Docker::Image.create('fromImage' => @attributes[:image])
+        Docker::Image.create('fromImage' => @attributes[:image])
       end
     elsif @attributes.key?(:build)
-      base_image = Docker::Image.build_from_dir(@attributes[:build])
+      Docker::Image.build_from_dir(@attributes[:build])
     end
   end
 
@@ -68,7 +66,7 @@ class ComposeContainer
 
     # Build link parameters
     @dependencies.each do |dependency|
-      links << "#{dependency.container.json['Id']}:#{dependency.attributes[:label]}"
+      links << "#{dependency.stats['Id']}:#{dependency.attributes[:label]}"
     end
 
     container_config = {
@@ -119,7 +117,7 @@ class ComposeContainer
   def start
     # Start dependencies
     @dependencies.each do |dependency|
-      dependency.start unless dependency.is_running?
+      dependency.start unless dependency.running?
     end
 
     # Create a container object
@@ -162,9 +160,16 @@ class ComposeContainer
   end
 
   #
+  # Return container statistics
+  #
+  def stats
+    @container.json
+  end
+
+  #
   # Check if a container is already running or not
   #
-  def is_running?
-    @container.nil? ? false : @container.json['State']['Running']
+  def running?
+    @container.nil? ? false : self.stats['State']['Running']
   end
 end

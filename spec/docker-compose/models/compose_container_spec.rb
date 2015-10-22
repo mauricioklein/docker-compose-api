@@ -57,11 +57,11 @@ describe ComposeContainer do
 
       #Start container
       entry.start
-      expect(entry.container.json['State']['Running']).to be true
+      expect(entry.running?).to be true
 
       # Stop container
       entry.stop
-      expect(entry.container.json['State']['Running']).to be false
+      expect(entry.running?).to be false
     end
 
     it 'should not start a container without either image and build commands' do
@@ -74,26 +74,6 @@ describe ComposeContainer do
 
       entry = ComposeContainer.new(attributes)
       expect{entry.start}.to raise_error(ArgumentError)
-    end
-  end
-
-  context 'Delete container' do
-    it 'should delete a container' do
-      attributes = {
-        image: 'ubuntu:latest',
-        links: ['links:links'],
-        volumes: {'/tmp' => {}},
-        command: 'ps aux',
-        environment: ['ENVIRONMENT']
-      }
-
-      # Create a container
-      entry = ComposeContainer.new(attributes)
-
-      # Delete the container
-      entry.delete
-
-      expect(entry.container).to be_nil
     end
   end
 end
