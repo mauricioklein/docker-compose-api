@@ -5,11 +5,11 @@ require 'docker-compose/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "docker-compose-api"
-  spec.version       = DockerCompose::VERSION
+  spec.version       = DockerCompose.version
   spec.authors       = ["Mauricio S. Klein"]
   spec.email         = ["mauricio.klein.msk@gmail.com"]
-  spec.summary       = %q{A simple ruby client for docker/docker-compose remote api.}
-  spec.description   = %q{A simple ruby client for docker/docker-compose remote api.}
+  spec.summary       = %q{A simple ruby client for docker-compose api}
+  spec.description   = %q{A simple ruby client for docker-compose api.}
   spec.homepage      = "https://github.com/mauricioklein/docker-compose-api"
   spec.license       = "MIT"
 
@@ -21,6 +21,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "docker-api", "~> 1.22.2"
 
   spec.add_development_dependency "bundler"
-  spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
 end

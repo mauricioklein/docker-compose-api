@@ -1,5 +1,5 @@
-require 'docker-compose/version'
-require 'docker-compose/models/compose_entry'
+require_relative 'version'
+require_relative 'docker-compose/models/compose_entry'
 
 require 'yaml'
 require 'docker'

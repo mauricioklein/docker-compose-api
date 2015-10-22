@@ -1,3 +1,3 @@
 module DockerCompose
-  VERSION = "0.0.1"
+  self.version = "0.0.1"
 end
