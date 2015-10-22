@@ -41,6 +41,8 @@ module DockerCompose
     end
 
     link_containers
+
+    true
   end
 
   #
@@ -102,6 +104,8 @@ module DockerCompose
     entries.values.each do |entry|
       entry.send(method)
     end
+
+    true
   end
 
   def self.link_containers

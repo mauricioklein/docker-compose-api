@@ -68,7 +68,7 @@ class ComposeEntry
 
     # Build link parameters
     @dependencies.each do |dependency|
-      links << dependency.container.json['Id']
+      links << "#{dependency.container.json['Id']}:#{dependency.compose_attributes[:label]}"
     end
 
     container_config = {
