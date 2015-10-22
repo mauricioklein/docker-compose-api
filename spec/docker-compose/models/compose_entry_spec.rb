@@ -41,32 +41,10 @@ describe ComposeEntry do
       expect(port_entry.host_ip).to eq('127.0.0.1')
       expect(port_entry.host_port).to eq('8001')
     end
+  end
 
-    it 'should not accept both image and build commands on the same compose entry' do
-      attributes = {
-        image: 'ubuntu:latest',
-        build: '.',
-        links: ['links:links'],
-        volumes: {'/tmp' => {}},
-        command: 'ps aux',
-        environment: ['ENVIRONMENT']
-      }
-
-      expect{ComposeEntry.new(attributes)}.to raise_error(ArgumentError)
-    end
-
-    it 'should not accept compose entry without either image and build commands' do
-      attributes = {
-        links: ['links:links'],
-        volumes: {'/tmp' => {}},
-        command: 'ps aux',
-        environment: ['ENVIRONMENT']
-      }
-
-      expect{ComposeEntry.new(attributes)}.to raise_error(ArgumentError)
-    end
-
-    it 'should start and stop a container' do
+  context 'Start container' do
+    it 'should start/stop a container' do
       attributes = {
         image: 'ubuntu:latest',
         links: ['links:links'],
@@ -86,6 +64,20 @@ describe ComposeEntry do
       expect(entry.container.json['State']['Running']).to be false
     end
 
+    it 'should not start a container without either image and build commands' do
+      attributes = {
+        links: ['links:links'],
+        volumes: {'/tmp' => {}},
+        command: 'ps aux',
+        environment: ['ENVIRONMENT']
+      }
+
+      entry = ComposeEntry.new(attributes)
+      expect{entry.start}.to raise_error(ArgumentError)
+    end
+  end
+
+  context 'Delete container' do
     it 'should delete a container' do
       attributes = {
         image: 'ubuntu:latest',

@@ -3,7 +3,7 @@ require_relative 'compose_port'
 require_relative '../utils/compose_utils'
 
 class ComposeEntry
-  attr_reader :compose_attributes, :base_image, :container
+  attr_reader :compose_attributes, :base_image, :container, :dependencies
 
   def initialize(hash_attributes)
     @compose_attributes = {
@@ -21,9 +21,7 @@ class ComposeEntry
     # Docker client variables
     @base_image = nil
     @container = nil
-
-    prepare_image
-    prepare_container
+    @dependencies = []
   end
 
   private
@@ -32,14 +30,9 @@ class ComposeEntry
   # Download or build an image
   #
   def prepare_image
-    has_both = @compose_attributes.key?(:image) && @compose_attributes.key?(:build)
-    has_none = !@compose_attributes.key?(:image) && !@compose_attributes.key?(:build)
+    has_image_or_build_arg = @compose_attributes.key?(:image) || @compose_attributes.key?(:build)
 
-    if has_both
-      raise ArgumentError.new('Docker compose should provide Image OR Build command, not both')
-    elsif has_none
-      raise ArgumentError.new('No Image or Build command provided')
-    end
+    raise ArgumentError.new('No Image or Build command provided') unless has_image_or_build_arg
 
     # Build or pull image
     if @compose_attributes.key?(:image)
@@ -60,7 +53,9 @@ class ComposeEntry
   def prepare_container
     exposed_ports = {}
     port_bindings = {}
+    links = []
 
+    # Build expose and port binding parameters
     if !@compose_attributes[:ports].nil?
       @compose_attributes[:ports].each do |port|
         exposed_ports["#{port.container_port}/tcp"] = {}
@@ -71,6 +66,11 @@ class ComposeEntry
       end
     end
 
+    # Build link parameters
+    @dependencies.each do |dependency|
+      links << dependency.container.json['Id']
+    end
+
     container_config = {
       Image: @compose_attributes[:image],
       Cmd: @compose_attributes[:command],
@@ -78,7 +78,7 @@ class ComposeEntry
       Volumes: @compose_attributes[:volumes],
       ExposedPorts: exposed_ports,
       HostConfig: {
-        #Links: @compose_attributes[:links],
+        Links: links,
         PortBindings: port_bindings
       }
     }
@@ -113,20 +113,58 @@ class ComposeEntry
 
   public
 
+  #
+  # Start the container and its dependencies
+  #
   def start
+    # Start dependencies
+    @dependencies.each do |dependency|
+      dependency.start unless dependency.is_running?
+    end
+
+    # Create a container object
+    if @container.nil?
+      prepare_image
+      prepare_container
+    end
+
     @container.start unless @container.nil?
   end
 
+  #
+  # Stop the container
+  #
   def stop
     @container.kill unless @container.nil?
   end
 
+  #
+  # Kill the container
+  #
   def kill
     @container.kill unless @container.nil?
   end
 
+  #
+  # Delete the container
+  #
   def delete
     @container.delete(:force => true) unless @container.nil?
     @container = nil
+  end
+
+  #
+  # Add a dependency to this container
+  # (i.e. a container that must be started before this one)
+  #
+  def add_dependency(dependency)
+    @dependencies << dependency
+  end
+
+  #
+  # Check if a container is already running or not
+  #
+  def is_running?
+    @container.nil? ? false : @container.json['State']['Running']
   end
 end

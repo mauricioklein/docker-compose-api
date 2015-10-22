@@ -39,6 +39,8 @@ module DockerCompose
       composeEntry = ComposeEntry.new(attr_hash)
       @entries[attr_hash[:label]] = composeEntry
     end
+
+    link_containers
   end
 
   #
@@ -63,7 +65,7 @@ module DockerCompose
   # Otherwise, all containers are started
   #
   def self.start(labels = [])
-    self.call_container_method(:start, labels)
+    call_container_method(:start, labels)
   end
 
   #
@@ -74,7 +76,7 @@ module DockerCompose
   # Otherwise, all containers are stopped
   #
   def self.stop(labels = [])
-    self.call_container_method(:stop, labels)
+    call_container_method(:stop, labels)
   end
 
   #
@@ -85,10 +87,9 @@ module DockerCompose
   # Otherwise, all containers are stopped
   #
   def self.kill(labels  = [])
-    self.call_container_method(:kill, labels)
+    call_container_method(:kill, labels)
   end
 
-  private_class_method
   def self.call_container_method(method, labels = [])
     if labels.empty?
       labels = @entries.keys
@@ -102,4 +103,19 @@ module DockerCompose
       entry.send(method)
     end
   end
+
+  def self.link_containers
+    entries.each do |entry|
+      links = entry.compose_attributes[:links]
+
+      next if links.nil?
+
+      links.each do |link|
+        dependency_entry = entries(link)
+        entry.dependencies << dependency_entry
+      end
+    end
+  end
+
+  private_class_method :call_container_method, :link_containers
 end
