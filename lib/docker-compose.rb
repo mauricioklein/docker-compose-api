@@ -1,10 +1,13 @@
-require_relative 'version'
 require_relative 'docker-compose/models/compose_entry'
 
 require 'yaml'
 require 'docker'
 
 module DockerCompose
+  def self.version
+    "0.0.1"
+  end
+
   #
   # Get Docker client object
   #
