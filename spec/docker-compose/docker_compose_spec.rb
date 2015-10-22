@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe DockerCompose do
   before(:all) do
-    DockerCompose.load(File.expand_path('spec/docker-compose/fixtures/sample1.yaml'))
+    @compose = DockerCompose.load(File.expand_path('spec/docker-compose/fixtures/sample1.yaml'))
   end
 
   it 'should be able to access Docker client' do
@@ -10,34 +10,34 @@ describe DockerCompose do
   end
 
   it 'should read a YAML file correctly' do
-    expect(DockerCompose.entries.length).to eq(2)
+    expect(@compose.containers.length).to eq(2)
   end
 
   context 'All containers' do
     it 'should start/stop all containers' do
       # Start containers to test Stop
-      DockerCompose.start
-      DockerCompose.entries.each do |entry|
+      @compose.start
+      @compose.containers.values.each do |entry|
         expect(entry.container.json['State']['Running']).to be true
       end
 
       # Stop containers
-      DockerCompose.stop
-      DockerCompose.entries.each do |entry|
+      @compose.stop
+      @compose.containers.values.each do |entry|
         expect(entry.container.json['State']['Running']).to be false
       end
     end
 
     it 'should start/kill all containers' do
       # Start containers to test Kill
-      DockerCompose.start
-      DockerCompose.entries.each do |entry|
+      @compose.start
+      @compose.containers.values.each do |entry|
         expect(entry.container.json['State']['Running']).to be true
       end
 
       # Kill containers
-      DockerCompose.kill
-      DockerCompose.entries.each do |entry|
+      @compose.kill
+      @compose.containers.values.each do |entry|
         expect(entry.container.json['State']['Running']).to be false
       end
     end
@@ -46,79 +46,79 @@ describe DockerCompose do
   context 'Single container' do
     context 'Without dependencies' do
       it 'should start/stop a single container' do
-        ubuntu = DockerCompose.entries.first.compose_attributes[:label]
-        redis  = DockerCompose.entries.last.compose_attributes[:label]
+        ubuntu = @compose.containers.values.first.attributes[:label]
+        redis  = @compose.containers.values.last.attributes[:label]
 
         # Should start Redis only, since it hasn't dependencies
-        DockerCompose.start([redis])
-        expect(DockerCompose.entries(ubuntu).container.json['State']['Running']).to be false
-        expect(DockerCompose.entries(redis).container.json['State']['Running']).to be true
+        @compose.start([redis])
+        expect(@compose.containers[ubuntu].container.json['State']['Running']).to be false
+        expect(@compose.containers[redis].container.json['State']['Running']).to be true
 
         # Stop Redis
-        DockerCompose.stop([redis])
-        expect(DockerCompose.entries(ubuntu).container.json['State']['Running']).to be false
-        expect(DockerCompose.entries(redis).container.json['State']['Running']).to be false
+        @compose.stop([redis])
+        expect(@compose.containers[ubuntu].container.json['State']['Running']).to be false
+        expect(@compose.containers[redis].container.json['State']['Running']).to be false
       end
 
       it 'should start/kill a single container' do
-        ubuntu = DockerCompose.entries.first.compose_attributes[:label]
-        redis  = DockerCompose.entries.last.compose_attributes[:label]
+        ubuntu = @compose.containers.values.first.attributes[:label]
+        redis  = @compose.containers.values.last.attributes[:label]
 
         # Should start Redis only, since it hasn't dependencies
-        DockerCompose.start([redis])
-        expect(DockerCompose.entries(ubuntu).container.json['State']['Running']).to be false
-        expect(DockerCompose.entries(redis).container.json['State']['Running']).to be true
+        @compose.start([redis])
+        expect(@compose.containers[ubuntu].container.json['State']['Running']).to be false
+        expect(@compose.containers[redis].container.json['State']['Running']).to be true
 
         # Stop Redis
-        DockerCompose.kill([redis])
-        expect(DockerCompose.entries(ubuntu).container.json['State']['Running']).to be false
-        expect(DockerCompose.entries(redis).container.json['State']['Running']).to be false
+        @compose.kill([redis])
+        expect(@compose.containers[ubuntu].container.json['State']['Running']).to be false
+        expect(@compose.containers[redis].container.json['State']['Running']).to be false
       end
     end # context 'Without dependencies'
 
     context 'With dependencies' do
       it 'should start/stop a single container' do
-        ubuntu = DockerCompose.entries.first.compose_attributes[:label]
-        redis  = DockerCompose.entries.last.compose_attributes[:label]
+        ubuntu = @compose.containers.values.first.attributes[:label]
+        redis  = @compose.containers.values.last.attributes[:label]
 
         # Should start Ubuntu and Redis, since Ubuntu depends on Redis
-        DockerCompose.start([ubuntu])
-        expect(DockerCompose.entries(ubuntu).container.json['State']['Running']).to be true
-        expect(DockerCompose.entries(redis).container.json['State']['Running']).to be true
+        @compose.start([ubuntu])
+        expect(@compose.containers[ubuntu].container.json['State']['Running']).to be true
+        expect(@compose.containers[redis].container.json['State']['Running']).to be true
 
         # Stop Ubuntu (Redis keeps running)
-        DockerCompose.stop([ubuntu])
-        expect(DockerCompose.entries(ubuntu).container.json['State']['Running']).to be false
-        expect(DockerCompose.entries(redis).container.json['State']['Running']).to be true
+        @compose.stop([ubuntu])
+        expect(@compose.containers[ubuntu].container.json['State']['Running']).to be false
+        expect(@compose.containers[redis].container.json['State']['Running']).to be true
 
         # Stop Redis
-        DockerCompose.stop([redis])
-        expect(DockerCompose.entries(redis).container.json['State']['Running']).to be false
+        @compose.stop([redis])
+        expect(@compose.containers[redis].container.json['State']['Running']).to be false
       end
 
       it 'should start/kill a single container' do
-        ubuntu = DockerCompose.entries.first.compose_attributes[:label]
-        redis  = DockerCompose.entries.last.compose_attributes[:label]
+        ubuntu = @compose.containers.values.first.attributes[:label]
+        redis  = @compose.containers.values.last.attributes[:label]
 
         # Should start Ubuntu and Redis, since Ubuntu depends on Redis
-        DockerCompose.start([ubuntu])
-        expect(DockerCompose.entries(ubuntu).container.json['State']['Running']).to be true
-        expect(DockerCompose.entries(redis).container.json['State']['Running']).to be true
+        @compose.start([ubuntu])
+        expect(@compose.containers[ubuntu].container.json['State']['Running']).to be true
+        expect(@compose.containers[redis].container.json['State']['Running']).to be true
 
         # Kill Ubuntu (Redis keeps running)
-        DockerCompose.kill([ubuntu])
-        expect(DockerCompose.entries(ubuntu).container.json['State']['Running']).to be false
-        expect(DockerCompose.entries(redis).container.json['State']['Running']).to be true
+        @compose.kill([ubuntu])
+        expect(@compose.containers[ubuntu].container.json['State']['Running']).to be false
+        expect(@compose.containers[redis].container.json['State']['Running']).to be true
 
         # Kill Redis
-        DockerCompose.kill([redis])
-        expect(DockerCompose.entries(redis).container.json['State']['Running']).to be false
+        @compose.kill([redis])
+        expect(@compose.containers[redis].container.json['State']['Running']).to be false
       end
     end # context 'with dependencies'
   end # context 'Single container'
 
   it 'should assign ports' do
-    ubuntu = DockerCompose.entries.first
+    ubuntu = @compose.containers.values.first
 
     # Start container
     ubuntu.start
@@ -142,7 +142,7 @@ describe DockerCompose do
   end
 
   after(:all) do
-    DockerCompose.entries.each do |entry|
+    @compose.containers.values.each do |entry|
       entry.container.delete
     end
   end

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ComposeEntry do
+describe ComposeContainer do
   context 'Object creation' do
     it 'should prepare the attributes correctly' do
       attributes = {
@@ -12,31 +12,31 @@ describe ComposeEntry do
         environment: ['ENVIRONMENT']
       }
 
-      entry = ComposeEntry.new(attributes)
+      entry = ComposeContainer.new(attributes)
 
-      expect(entry.compose_attributes[:image]).to eq(attributes[:image])
-      expect(entry.compose_attributes[:links]).to eq(attributes[:links])
-      expect(entry.compose_attributes[:volumes]).to eq(attributes[:volumes])
-      expect(entry.compose_attributes[:command]).to eq(attributes[:command].split(' '))
-      expect(entry.compose_attributes[:environment]).to eq(attributes[:environment])
+      expect(entry.attributes[:image]).to eq(attributes[:image])
+      expect(entry.attributes[:links]).to eq(attributes[:links])
+      expect(entry.attributes[:volumes]).to eq(attributes[:volumes])
+      expect(entry.attributes[:command]).to eq(attributes[:command].split(' '))
+      expect(entry.attributes[:environment]).to eq(attributes[:environment])
 
       # Check ports structure
-      expect(entry.compose_attributes[:ports].length).to eq(attributes[:ports].length)
+      expect(entry.attributes[:ports].length).to eq(attributes[:ports].length)
 
       # Port 1: '3000'
-      port_entry = entry.compose_attributes[:ports][0]
+      port_entry = entry.attributes[:ports][0]
       expect(port_entry.container_port).to eq('3000')
       expect(port_entry.host_ip).to eq(nil)
       expect(port_entry.host_port).to eq(nil)
 
       # Port 2: '8000:8000'
-      port_entry = entry.compose_attributes[:ports][1]
+      port_entry = entry.attributes[:ports][1]
       expect(port_entry.container_port).to eq('8000')
       expect(port_entry.host_ip).to eq(nil)
       expect(port_entry.host_port).to eq('8000')
 
       # Port 3: '127.0.0.1:8001:8001'
-      port_entry = entry.compose_attributes[:ports][2]
+      port_entry = entry.attributes[:ports][2]
       expect(port_entry.container_port).to eq('8001')
       expect(port_entry.host_ip).to eq('127.0.0.1')
       expect(port_entry.host_port).to eq('8001')
@@ -53,7 +53,7 @@ describe ComposeEntry do
         environment: ['ENVIRONMENT']
       }
 
-      entry = ComposeEntry.new(attributes)
+      entry = ComposeContainer.new(attributes)
 
       #Start container
       entry.start
@@ -72,7 +72,7 @@ describe ComposeEntry do
         environment: ['ENVIRONMENT']
       }
 
-      entry = ComposeEntry.new(attributes)
+      entry = ComposeContainer.new(attributes)
       expect{entry.start}.to raise_error(ArgumentError)
     end
   end
@@ -88,7 +88,7 @@ describe ComposeEntry do
       }
 
       # Create a container
-      entry = ComposeEntry.new(attributes)
+      entry = ComposeContainer.new(attributes)
 
       # Delete the container
       entry.delete

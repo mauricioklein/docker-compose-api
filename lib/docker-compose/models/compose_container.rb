@@ -2,11 +2,11 @@ require 'docker'
 require_relative 'compose_port'
 require_relative '../utils/compose_utils'
 
-class ComposeEntry
-  attr_reader :compose_attributes, :base_image, :container, :dependencies
+class ComposeContainer
+  attr_reader :attributes, :base_image, :container, :dependencies
 
   def initialize(hash_attributes)
-    @compose_attributes = {
+    @attributes = {
       label: hash_attributes[:label],
       image: ComposeUtils.format_image(hash_attributes[:image]),
       build: hash_attributes[:build],
@@ -30,19 +30,19 @@ class ComposeEntry
   # Download or build an image
   #
   def prepare_image
-    has_image_or_build_arg = @compose_attributes.key?(:image) || @compose_attributes.key?(:build)
+    has_image_or_build_arg = @attributes.key?(:image) || @attributes.key?(:build)
 
     raise ArgumentError.new('No Image or Build command provided') unless has_image_or_build_arg
 
     # Build or pull image
-    if @compose_attributes.key?(:image)
+    if @attributes.key?(:image)
       if image_exists
-        base_image = Docker::Image.get(@compose_attributes[:image])
+        base_image = Docker::Image.get(@attributes[:image])
       else
-        base_image = Docker::Image.create('fromImage' => @compose_attributes[:image])
+        base_image = Docker::Image.create('fromImage' => @attributes[:image])
       end
-    elsif @compose_attributes.key?(:build)
-      base_image = Docker::Image.build_from_dir(@compose_attributes[:build])
+    elsif @attributes.key?(:build)
+      base_image = Docker::Image.build_from_dir(@attributes[:build])
     end
   end
 
@@ -56,8 +56,8 @@ class ComposeEntry
     links = []
 
     # Build expose and port binding parameters
-    if !@compose_attributes[:ports].nil?
-      @compose_attributes[:ports].each do |port|
+    if !@attributes[:ports].nil?
+      @attributes[:ports].each do |port|
         exposed_ports["#{port.container_port}/tcp"] = {}
         port_bindings["#{port.container_port}/tcp"] = [{
           "HostIp" => port.host_ip || '',
@@ -68,14 +68,14 @@ class ComposeEntry
 
     # Build link parameters
     @dependencies.each do |dependency|
-      links << "#{dependency.container.json['Id']}:#{dependency.compose_attributes[:label]}"
+      links << "#{dependency.container.json['Id']}:#{dependency.attributes[:label]}"
     end
 
     container_config = {
-      Image: @compose_attributes[:image],
-      Cmd: @compose_attributes[:command],
-      Env: @compose_attributes[:environment],
-      Volumes: @compose_attributes[:volumes],
+      Image: @attributes[:image],
+      Cmd: @attributes[:command],
+      Env: @attributes[:environment],
+      Volumes: @attributes[:volumes],
       ExposedPorts: exposed_ports,
       HostConfig: {
         Links: links,
@@ -108,7 +108,7 @@ class ComposeEntry
   # Check if a given image already exists in host
   #
   def image_exists
-    Docker::Image.exist?(@compose_attributes[:image])
+    Docker::Image.exist?(@attributes[:image])
   end
 
   public
