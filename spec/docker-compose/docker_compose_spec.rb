@@ -5,6 +5,10 @@ describe DockerCompose do
     @compose = DockerCompose.load(File.expand_path('spec/docker-compose/fixtures/sample1.yaml'))
   end
 
+  it 'should be able to access gem version' do
+    expect(DockerCompose.version).to_not be_nil
+  end
+
   it 'should be able to access Docker client' do
     expect(DockerCompose.docker_client).to_not be_nil
   end

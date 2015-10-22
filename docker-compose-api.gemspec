@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Mauricio S. Klein"]
   spec.email         = ["mauricio.klein.msk@gmail.com"]
   spec.summary       = %q{A simple ruby client for docker-compose api}
-  spec.description   = %q{A simple ruby client for docker-compose api.}
+  spec.description   = %q{A simple ruby client for docker-compose api}
   spec.homepage      = "https://github.com/mauricioklein/docker-compose-api"
   spec.license       = "MIT"
 
