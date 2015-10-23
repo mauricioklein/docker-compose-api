@@ -44,13 +44,31 @@ describe ComposeContainer do
   end
 
   context 'Start container' do
-    it 'should start/stop a container' do
+    it 'should start/stop a container from image' do
       attributes = {
         image: 'ubuntu:latest',
         links: ['links:links'],
         volumes: {'/tmp' => {}},
         command: 'ps aux',
         environment: ['ENVIRONMENT']
+      }
+
+      entry = ComposeContainer.new(attributes)
+
+      #Start container
+      entry.start
+      expect(entry.running?).to be true
+
+      # Stop container
+      entry.stop
+      expect(entry.running?).to be false
+    end
+
+    it 'should start/stop a container from build' do
+      attributes = {
+        build: File.expand_path('spec/docker-compose/fixtures/'),
+        links: ['links:links'],
+        volumes: {'/tmp' => {}}
       }
 
       entry = ComposeContainer.new(attributes)

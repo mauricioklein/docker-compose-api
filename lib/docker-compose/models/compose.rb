@@ -30,7 +30,7 @@ class Compose
 
       links.each do |link|
         dependency_container = @containers[link]
-        container.dependencies << dependency_container
+        container.add_dependency(dependency_container)
       end
     end
   end

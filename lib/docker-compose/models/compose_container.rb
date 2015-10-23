@@ -3,7 +3,7 @@ require_relative 'compose_port'
 require_relative '../utils/compose_utils'
 
 class ComposeContainer
-  attr_reader :attributes, :dependencies
+  attr_reader :attributes
 
   def initialize(hash_attributes)
     @attributes = {
@@ -18,6 +18,7 @@ class ComposeContainer
     }.reject{ |key, value| value.nil? }
 
     # Docker client variables
+    @internal_image = nil
     @container = nil
     @dependencies = []
   end
@@ -34,13 +35,14 @@ class ComposeContainer
 
     # Build or pull image
     if @attributes.key?(:image)
-      if image_exists
-        Docker::Image.get(@attributes[:image])
-      else
-        Docker::Image.create('fromImage' => @attributes[:image])
+      @internal_image = @attributes[:image]
+
+      unless image_exists(@internal_image)
+        Docker::Image.create('fromImage' => @internal_image)
       end
     elsif @attributes.key?(:build)
-      Docker::Image.build_from_dir(@attributes[:build])
+      @internal_image = SecureRandom.hex # Random name for image
+      Docker::Image.build_from_dir(@attributes[:build], {t: @internal_image})
     end
   end
 
@@ -70,7 +72,7 @@ class ComposeContainer
     end
 
     container_config = {
-      Image: @attributes[:image],
+      Image: @internal_image,
       Cmd: @attributes[:command],
       Env: @attributes[:environment],
       Volumes: @attributes[:volumes],
@@ -105,8 +107,8 @@ class ComposeContainer
   #
   # Check if a given image already exists in host
   #
-  def image_exists
-    Docker::Image.exist?(@attributes[:image])
+  def image_exists(image_name)
+    Docker::Image.exist?(image_name)
   end
 
   public
