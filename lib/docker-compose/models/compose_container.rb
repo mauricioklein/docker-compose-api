@@ -2,28 +2,24 @@ require 'docker'
 require_relative 'compose_port'
 require_relative '../utils/compose_utils'
 
-class ComposeEntry
-  attr_reader :compose_attributes, :base_image, :container
+class ComposeContainer
+  attr_reader :attributes, :dependencies
 
   def initialize(hash_attributes)
-    @compose_attributes = {
+    @attributes = {
       label: hash_attributes[:label],
       image: ComposeUtils.format_image(hash_attributes[:image]),
       build: hash_attributes[:build],
       links: hash_attributes[:links],
       ports: prepare_ports(hash_attributes[:ports]),
-      #expose: hash_attributes[:expose],
       volumes: hash_attributes[:volumes],
       command: ComposeUtils.format_command(hash_attributes[:command]),
       environment: hash_attributes[:environment]
     }.reject{ |key, value| value.nil? }
 
     # Docker client variables
-    @base_image = nil
     @container = nil
-
-    prepare_image
-    prepare_container
+    @dependencies = []
   end
 
   private
@@ -32,22 +28,19 @@ class ComposeEntry
   # Download or build an image
   #
   def prepare_image
-    has_both = @compose_attributes.key?(:image) && @compose_attributes.key?(:build)
-    has_none = !@compose_attributes.key?(:image) && !@compose_attributes.key?(:build)
+    has_image_or_build_arg = @attributes.key?(:image) || @attributes.key?(:build)
 
-    if has_both
-      raise ArgumentError.new('Docker compose should provide Image OR Build command, not both')
-    elsif has_none
-      raise ArgumentError.new('No Image or Build command provided')
-    end
+    raise ArgumentError.new('No Image or Build command provided') unless has_image_or_build_arg
 
     # Build or pull image
-    if compose_attributes.key?(:image)
-      #puts "Pulling image: #{compose_attributes[:image]}"
-      base_image = Docker::Image.create('fromImage' => compose_attributes[:image])
-    elsif compose_attributes.key?(:build)
-      #puts "Building image from: #{compose_attributes[:build]}"
-      base_image = Docker::Image.build_from_dir(compose_attributes[:build])
+    if @attributes.key?(:image)
+      if image_exists
+        Docker::Image.get(@attributes[:image])
+      else
+        Docker::Image.create('fromImage' => @attributes[:image])
+      end
+    elsif @attributes.key?(:build)
+      Docker::Image.build_from_dir(@attributes[:build])
     end
   end
 
@@ -58,9 +51,11 @@ class ComposeEntry
   def prepare_container
     exposed_ports = {}
     port_bindings = {}
+    links = []
 
-    if !@compose_attributes[:ports].nil?
-      @compose_attributes[:ports].each do |port|
+    # Build expose and port binding parameters
+    if !@attributes[:ports].nil?
+      @attributes[:ports].each do |port|
         exposed_ports["#{port.container_port}/tcp"] = {}
         port_bindings["#{port.container_port}/tcp"] = [{
           "HostIp" => port.host_ip || '',
@@ -69,14 +64,19 @@ class ComposeEntry
       end
     end
 
+    # Build link parameters
+    @dependencies.each do |dependency|
+      links << "#{dependency.stats['Id']}:#{dependency.attributes[:label]}"
+    end
+
     container_config = {
-      Image: @compose_attributes[:image],
-      Cmd: @compose_attributes[:command],
-      Env: @compose_attributes[:environment],
-      Volumes: @compose_attributes[:volumes],
+      Image: @attributes[:image],
+      Cmd: @attributes[:command],
+      Env: @attributes[:environment],
+      Volumes: @attributes[:volumes],
       ExposedPorts: exposed_ports,
       HostConfig: {
-        #Links: @compose_attributes[:links],
+        Links: links,
         PortBindings: port_bindings
       }
     }
@@ -102,22 +102,74 @@ class ComposeEntry
     ports
   end
 
+  #
+  # Check if a given image already exists in host
+  #
+  def image_exists
+    Docker::Image.exist?(@attributes[:image])
+  end
+
   public
 
+  #
+  # Start the container and its dependencies
+  #
   def start
+    # Start dependencies
+    @dependencies.each do |dependency|
+      dependency.start unless dependency.running?
+    end
+
+    # Create a container object
+    if @container.nil?
+      prepare_image
+      prepare_container
+    end
+
     @container.start unless @container.nil?
   end
 
+  #
+  # Stop the container
+  #
   def stop
     @container.kill unless @container.nil?
   end
 
+  #
+  # Kill the container
+  #
   def kill
     @container.kill unless @container.nil?
   end
 
+  #
+  # Delete the container
+  #
   def delete
     @container.delete(:force => true) unless @container.nil?
     @container = nil
+  end
+
+  #
+  # Add a dependency to this container
+  # (i.e. a container that must be started before this one)
+  #
+  def add_dependency(dependency)
+    @dependencies << dependency
+  end
+
+  #
+  # Return container statistics
+  #
+  def stats
+    @container.json
+  end
+
+  #
+  # Check if a container is already running or not
+  #
+  def running?
+    @container.nil? ? false : self.stats['State']['Running']
   end
 end
