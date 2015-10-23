@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/mauricioklein/docker-compose-api.svg?branch=develop)](https://travis-ci.org/mauricioklein/docker-compose-api)
 [![Code Climate](https://codeclimate.com/github/mauricioklein/docker-compose-api/badges/gpa.svg)](https://codeclimate.com/github/mauricioklein/docker-compose-api)
 [![Test Coverage](https://codeclimate.com/github/mauricioklein/docker-compose-api/badges/coverage.svg)](https://codeclimate.com/github/mauricioklein/docker-compose-api/coverage)
+[![Gem Version](https://badge.fury.io/rb/docker-compose-api.svg)](https://badge.fury.io/rb/docker-compose-api)
 
 # Docker Compose Api
 
