@@ -8,8 +8,12 @@ Docker Compose API provides an easy way to parse docker compose files and lift t
 
 ## Instalation
 
-```sh
-$ gem install docker-compose-api
+```ruby
+# Add the line below on your Gemfile...
+gem 'docker-compose-api', git: 'https://github.com/mauricioklein/docker-compose-api'
+
+# ... and run bundle install
+bundle install
 ```
 
 ## Usage
@@ -17,39 +21,43 @@ $ gem install docker-compose-api
 ```ruby
 require 'docker-compose'
 
+# Docker compose is simply a layer running over Docker client (https://github.com/swipely/docker-api).
+# So, all Docker specific configurations, such URL, authentication, SSL, etc, must be made directly on
+# Docker client.
+#
+# Docker compose provides an easy way to access this client:
+DockerCompose.docker_client
+
 # Gem version
 DockerCompose.version
 
 # Loading a compose file
 compose = DockerCompose.load('[path to docker compose file]')
 
-# Accessing all containers
-all_containers = compose.containers
+# Accessing containers
+compose.containers                     # access all containers
+compose.containers['[container name]'] # access a specific container
 
-# Acessing an specific container
-a_single_container = compose.containers['[container name]']
+# Starting containers (and their dependencies)
+compose.start                                    # start all containers
+compose.start(['container1', 'container2', ...]) # start a list of specific containers
 
-# Starting all containers and their dependencies
-compose.start
+# Stopping containers
+# (ps: container dependencies will keep running)
+compose.stop                                    # stop all containers
+compose.stop(['container1', 'container2', ...]) # stop a list of specific containers
 
-# ... or starting a list of specific containers
-compose.start(['container1', 'container2', ...])
-
-# Stopping all containers
-compose.stop
-
-# ... or stopping a list of specific containers
-compose.stop(['container1', 'container2', ...])
+# Killing containers
+# (ps: container dependencies will keep running)
+compose.kill                                    # kill all containers
+compose.kill(['container1', 'container2', ...]) # kill a list of specific containers
 
 # Checking if a container is running or not
-a_container = compose.container('a_container')
+a_container = compose.containers['a_container']
 a_container.running?
 
-# ... and for checking container complete informations
+# Accessing container informations
 a_container.stats
-
-# Accessing Docker client directly
-DockerCompose.docker_client
 ```
 
 ## Contributing
