@@ -8,6 +8,14 @@ Docker Compose API provides an easy way to parse docker compose files and lift t
 
 ## Instalation
 
+Install the gem in whole environment
+
+```ruby
+gem install docker-compose-api
+```
+
+... or using Bundler
+
 ```ruby
 # Add the line below on your Gemfile...
 gem 'docker-compose-api', git: 'https://github.com/mauricioklein/docker-compose-api'
