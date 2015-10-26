@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe DockerCompose do
   before(:all) do
-    @compose = DockerCompose.load(File.expand_path('spec/docker-compose/fixtures/sample1.yaml'))
+    @compose = DockerCompose.load(File.expand_path('spec/docker-compose/fixtures/compose_1.yaml'))
   end
 
   it 'should be able to access gem version' do
@@ -123,7 +123,7 @@ describe DockerCompose do
         expect(@compose.containers[container2].running?).to be false
       end
 
-      it 'should be able to ping a dependency container' do
+      it 'should be able to ping a dependent container' do
         container1 = @compose.containers.values.first.attributes[:label]
         container2 = @compose.containers.values.last.attributes[:label]
 

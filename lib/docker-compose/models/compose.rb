@@ -28,8 +28,8 @@ class Compose
 
       next if links.nil?
 
-      links.each do |link|
-        dependency_container = @containers[link]
+      links.each do |service, label|
+        dependency_container = @containers[service]
         container.add_dependency(dependency_container)
       end
     end

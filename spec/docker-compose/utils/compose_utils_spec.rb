@@ -51,4 +51,18 @@ describe ComposeUtils do
       expect(compose_port.host_ip).to eq('127.0.0.1')
     end
   end
+
+  context 'Format links' do
+    it 'should recognize pattern "[service]"' do
+      links = ComposeUtils.format_links(['service'])
+      expect(links.key?('service')).to be true
+      expect(links['service']).to_not be_nil
+    end
+
+    it 'should recognize pattern "[service:label]"' do
+      links = ComposeUtils.format_links(['service:label'])
+      expect(links.key?('service')).to be true
+      expect(links['service']).to eq('label')
+    end
+  end
 end

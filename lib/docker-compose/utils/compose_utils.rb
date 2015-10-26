@@ -57,4 +57,28 @@ module ComposeUtils
 
     compose_port
   end
+
+  #
+  # Generate a pair key:hash with
+  # format {service:label}
+  #
+  def self.format_links(links_array)
+    links = {}
+
+    return if links_array.nil?
+
+    links_array.each do |link|
+      parts = link.split(':')
+
+      case parts.length
+        when 1
+          links[parts[0]] = SecureRandom.hex
+
+        when 2
+          links[parts[0]] = parts[1]
+      end
+    end
+
+    links
+  end
 end
