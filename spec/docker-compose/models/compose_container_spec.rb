@@ -4,11 +4,11 @@ describe ComposeContainer do
   context 'Object creation' do
     it 'should prepare the attributes correctly' do
       attributes = {
-        image: 'ubuntu:latest',
+        image: 'busybox:latest',
         links: ['links:links'],
         ports: ['3000', '8000:8000', '127.0.0.1:8001:8001'],
         volumes: {'/tmp' => {}},
-        command: 'ps aux',
+        command: 'ping -c 3 localhost',
         environment: ['ENVIRONMENT']
       }
 
@@ -46,10 +46,10 @@ describe ComposeContainer do
   context 'Start container' do
     it 'should start/stop a container from image' do
       attributes = {
-        image: 'ubuntu:latest',
+        image: 'busybox:latest',
         links: ['links:links'],
         volumes: {'/tmp' => {}},
-        command: 'ps aux',
+        command: 'ping -c 3 localhost',
         environment: ['ENVIRONMENT']
       }
 
