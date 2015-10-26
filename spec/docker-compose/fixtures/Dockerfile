@@ -1,2 +1,2 @@
-FROM ubuntu
-CMD ["sleep", "1000"]
+FROM busybox
+CMD ["ping", "localhost"]

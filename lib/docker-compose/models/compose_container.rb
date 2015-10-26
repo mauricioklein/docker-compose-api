@@ -3,7 +3,7 @@ require_relative 'compose_port'
 require_relative '../utils/compose_utils'
 
 class ComposeContainer
-  attr_reader :attributes
+  attr_reader :attributes, :container
 
   def initialize(hash_attributes)
     @attributes = {

@@ -17,6 +17,10 @@ describe DockerCompose do
     expect(@compose.containers.length).to eq(2)
   end
 
+  it 'should raise error when reading an invalid YAML file' do
+    expect{DockerCompose.load('')}.to raise_error(ArgumentError)
+  end
+
   context 'All containers' do
     it 'should start/stop all containers' do
       # Start containers to test Stop
@@ -50,85 +54,99 @@ describe DockerCompose do
   context 'Single container' do
     context 'Without dependencies' do
       it 'should start/stop a single container' do
-        ubuntu = @compose.containers.values.first.attributes[:label]
-        redis  = @compose.containers.values.last.attributes[:label]
+        container1 = @compose.containers.values.first.attributes[:label]
+        container2 = @compose.containers.values.last.attributes[:label]
 
         # Should start Redis only, since it hasn't dependencies
-        @compose.start([redis])
-        expect(@compose.containers[ubuntu].running?).to be false
-        expect(@compose.containers[redis].running?).to be true
+        @compose.start([container2])
+        expect(@compose.containers[container1].running?).to be false
+        expect(@compose.containers[container2].running?).to be true
 
         # Stop Redis
-        @compose.stop([redis])
-        expect(@compose.containers[ubuntu].running?).to be false
-        expect(@compose.containers[redis].running?).to be false
+        @compose.stop([container2])
+        expect(@compose.containers[container1].running?).to be false
+        expect(@compose.containers[container2].running?).to be false
       end
 
       it 'should start/kill a single container' do
-        ubuntu = @compose.containers.values.first.attributes[:label]
-        redis  = @compose.containers.values.last.attributes[:label]
+        container1 = @compose.containers.values.first.attributes[:label]
+        container2 = @compose.containers.values.last.attributes[:label]
 
         # Should start Redis only, since it hasn't dependencies
-        @compose.start([redis])
-        expect(@compose.containers[ubuntu].running?).to be false
-        expect(@compose.containers[redis].running?).to be true
+        @compose.start([container2])
+        expect(@compose.containers[container1].running?).to be false
+        expect(@compose.containers[container2].running?).to be true
 
         # Stop Redis
-        @compose.kill([redis])
-        expect(@compose.containers[ubuntu].running?).to be false
-        expect(@compose.containers[redis].running?).to be false
+        @compose.kill([container2])
+        expect(@compose.containers[container1].running?).to be false
+        expect(@compose.containers[container2].running?).to be false
       end
     end # context 'Without dependencies'
 
     context 'With dependencies' do
       it 'should start/stop a single container' do
-        ubuntu = @compose.containers.values.first.attributes[:label]
-        redis  = @compose.containers.values.last.attributes[:label]
+        container1 = @compose.containers.values.first.attributes[:label]
+        container2 = @compose.containers.values.last.attributes[:label]
 
         # Should start Ubuntu and Redis, since Ubuntu depends on Redis
-        @compose.start([ubuntu])
-        expect(@compose.containers[ubuntu].running?).to be true
-        expect(@compose.containers[redis].running?).to be true
+        @compose.start([container1])
+        expect(@compose.containers[container1].running?).to be true
+        expect(@compose.containers[container2].running?).to be true
 
         # Stop Ubuntu (Redis keeps running)
-        @compose.stop([ubuntu])
-        expect(@compose.containers[ubuntu].running?).to be false
-        expect(@compose.containers[redis].running?).to be true
+        @compose.stop([container1])
+        expect(@compose.containers[container1].running?).to be false
+        expect(@compose.containers[container2].running?).to be true
 
         # Stop Redis
-        @compose.stop([redis])
-        expect(@compose.containers[redis].running?).to be false
+        @compose.stop([container2])
+        expect(@compose.containers[container2].running?).to be false
       end
 
       it 'should start/kill a single container' do
-        ubuntu = @compose.containers.values.first.attributes[:label]
-        redis  = @compose.containers.values.last.attributes[:label]
+        container1 = @compose.containers.values.first.attributes[:label]
+        container2 = @compose.containers.values.last.attributes[:label]
 
         # Should start Ubuntu and Redis, since Ubuntu depends on Redis
-        @compose.start([ubuntu])
-        expect(@compose.containers[ubuntu].running?).to be true
-        expect(@compose.containers[redis].running?).to be true
+        @compose.start([container1])
+        expect(@compose.containers[container1].running?).to be true
+        expect(@compose.containers[container2].running?).to be true
 
         # Kill Ubuntu (Redis keeps running)
-        @compose.kill([ubuntu])
-        expect(@compose.containers[ubuntu].running?).to be false
-        expect(@compose.containers[redis].running?).to be true
+        @compose.kill([container1])
+        expect(@compose.containers[container1].running?).to be false
+        expect(@compose.containers[container2].running?).to be true
 
         # Kill Redis
-        @compose.kill([redis])
-        expect(@compose.containers[redis].running?).to be false
+        @compose.kill([container2])
+        expect(@compose.containers[container2].running?).to be false
+      end
+
+      it 'should be able to ping a dependency container' do
+        container1 = @compose.containers.values.first.attributes[:label]
+        container2 = @compose.containers.values.last.attributes[:label]
+
+        # Start all containers
+        @compose.start
+        expect(@compose.containers[container1].running?).to be true
+        expect(@compose.containers[container2].running?).to be true
+
+        # Ping container2 from container1
+        ping_response = @compose.containers[container1].container.exec(['ping', '-c', '3', 'busybox2'])
+        expect(ping_response[2]).to eq(0) # Status 0 = OK
       end
     end # context 'with dependencies'
   end # context 'Single container'
 
   it 'should assign ports' do
-    ubuntu = @compose.containers.values.first
+    container1 = @compose.containers.values.first
 
     # Start container
-    ubuntu.start
+    container1.start
 
-    port_bindings = ubuntu.stats['HostConfig']['PortBindings']
-    exposed_ports = ubuntu.stats['Config']['ExposedPorts']
+    port_bindings = container1.stats['HostConfig']['PortBindings']
+    exposed_ports = container1.stats['Config']['ExposedPorts']
 
     # Check port bindings
     expect(port_bindings.length).to eq(3)
@@ -142,21 +160,21 @@ describe DockerCompose do
     expect(exposed_ports.key?('8001/tcp')).to be true
 
     # Stop container
-    ubuntu.stop
+    container1.stop
   end
 
   it 'should link containers' do
-    ubuntu = @compose.containers.values.first
+    container1 = @compose.containers.values.first
 
     # Start container
-    ubuntu.start
+    container1.start
 
     # Ubuntu should be linked to Redis
-    links = ubuntu.stats['HostConfig']['Links']
+    links = container1.stats['HostConfig']['Links']
     expect(links.length).to eq(1)
 
     # Stop container
-    ubuntu.stop
+    container1.stop
   end
 
   after(:all) do

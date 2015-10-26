@@ -1,5 +1,5 @@
-ubuntu:
-  image: ubuntu
+busybox1:
+  image: busybox
   ports:
     - "3000"
     - "8000:8000"
@@ -7,10 +7,11 @@ ubuntu:
   expose:
     - "5000"
   links:
-    - redis
-  command: /bin/sleep 60
+    - busybox2
+  command: ping busybox2
 
-redis:
-  image: redis
+busybox2:
+  image: busybox
   expose:
     - "6000"
+  command: ping localhost

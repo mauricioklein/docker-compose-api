@@ -19,8 +19,7 @@ module DockerCompose
   #
   def self.load(filepath)
     unless File.exist?(filepath)
-      puts("Compose file doesn't exists")
-      raise ENOENT
+      raise ArgumentError, 'Compose file doesn\'t exists'
     end
 
     compose = Compose.new
