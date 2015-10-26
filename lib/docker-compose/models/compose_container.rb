@@ -3,14 +3,14 @@ require_relative 'compose_port'
 require_relative '../utils/compose_utils'
 
 class ComposeContainer
-  attr_reader :attributes
+  attr_reader :attributes, :container, :dependencies
 
   def initialize(hash_attributes)
     @attributes = {
       label: hash_attributes[:label],
       image: ComposeUtils.format_image(hash_attributes[:image]),
       build: hash_attributes[:build],
-      links: hash_attributes[:links],
+      links: ComposeUtils.format_links(hash_attributes[:links]),
       ports: prepare_ports(hash_attributes[:ports]),
       volumes: hash_attributes[:volumes],
       command: ComposeUtils.format_command(hash_attributes[:command]),
