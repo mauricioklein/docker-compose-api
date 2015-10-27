@@ -1,4 +1,5 @@
 require 'docker'
+require 'securerandom'
 require_relative 'compose_port'
 require_relative '../utils/compose_utils'
 
