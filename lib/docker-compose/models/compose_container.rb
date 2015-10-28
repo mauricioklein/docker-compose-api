@@ -49,28 +49,15 @@ class ComposeContainer
 
   #
   # Start a new container with parameters informed in object construction
-  # (TODO: start container from a Dockerfile)
   #
   def prepare_container
+    # Prepare attributes
+    port_bindings = prepare_port_bindings
+    links = prepare_links
+
+    # Exposed ports are port bindings with an empty hash as value
     exposed_ports = {}
-    port_bindings = {}
-    links = []
-
-    # Build expose and port binding parameters
-    if !@attributes[:ports].nil?
-      @attributes[:ports].each do |port|
-        exposed_ports["#{port.container_port}/tcp"] = {}
-        port_bindings["#{port.container_port}/tcp"] = [{
-          "HostIp" => port.host_ip || '',
-          "HostPort" => port.host_port || ''
-        }]
-      end
-    end
-
-    # Build link parameters
-    @dependencies.each do |dependency|
-      links << "#{dependency.stats['Id']}:#{dependency.attributes[:label]}"
-    end
+    port_bindings.each {|k, v| exposed_ports[k] = {}}
 
     container_config = {
       Image: @internal_image,
@@ -85,6 +72,39 @@ class ComposeContainer
     }
 
     @container = Docker::Container.create(container_config)
+  end
+
+  #
+  # Prepare port binding attribute based on ports
+  # received from compose file
+  #
+  def prepare_port_bindings
+    port_bindings = {}
+
+    return port_bindings if @attributes[:ports].nil?
+
+    @attributes[:ports].each do |port|
+      port_bindings["#{port.container_port}/tcp"] = [{
+        "HostIp" => port.host_ip || '',
+        "HostPort" => port.host_port || ''
+      }]
+    end
+
+    port_bindings
+  end
+
+  #
+  # Prepare link entries based on
+  # attributes received from compose
+  #
+  def prepare_links
+    links = []
+
+    @dependencies.each do |dependency|
+      links << "#{dependency.stats['Id']}:#{dependency.attributes[:label]}"
+    end
+
+    links
   end
 
   #
