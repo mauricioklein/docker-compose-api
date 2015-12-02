@@ -177,6 +177,32 @@ describe DockerCompose do
     container1.stop
   end
 
+  it 'supports setting environment as array' do
+    container1 = @compose.containers.values.first
+
+    # Start container
+    container1.start
+
+    env = container1.stats['Config']['Env']
+    expect(env).to eq(%w(MYENV1=variable1))
+
+    # Stop container
+    container1.stop
+  end
+
+  it 'supports setting environment as hash' do
+    container1 = @compose.containers.values.last
+
+    # Start container
+    container1.start
+
+    env = container1.stats['Config']['Env']
+    expect(env).to eq(%w(MYENV2=variable2))
+
+    # Stop container
+    container1.stop
+  end
+
   after(:all) do
     @compose.containers.values.each do |entry|
       entry.delete

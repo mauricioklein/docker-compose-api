@@ -15,7 +15,7 @@ class ComposeContainer
       ports: prepare_ports(hash_attributes[:ports]),
       volumes: hash_attributes[:volumes],
       command: ComposeUtils.format_command(hash_attributes[:command]),
-      environment: hash_attributes[:environment]
+      environment: prepare_environment(hash_attributes[:environment])
     }.reject{ |key, value| value.nil? }
 
     # Docker client variables
@@ -123,6 +123,14 @@ class ComposeContainer
     end
 
     ports
+  end
+
+  #
+  # Forces the environment structure to use the array format.
+  #
+  def prepare_environment(env_entries)
+    return env_entries unless env_entries.is_a?(Hash)
+    env_entries.to_a.map { |x| x.join('=') }
   end
 
   #
