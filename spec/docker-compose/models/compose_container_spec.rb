@@ -133,4 +133,20 @@ describe ComposeContainer do
       expect{@entry.start}.to raise_error(ArgumentError)
     end
   end
+
+  context 'With environment as a hash' do
+    before(:all) do
+      @attributes = {
+        image: 'busybox:latest',
+        command: 'ping -c 3 localhost',
+        environment: { ENVIRONMENT: 'VALUE' }
+      }
+
+      @entry = ComposeContainer.new(@attributes)
+    end
+
+    it 'should prepare environment attribute correctly' do
+      expect(@entry.attributes[:environment]).to eq(%w(ENVIRONMENT=VALUE))
+    end
+  end
 end

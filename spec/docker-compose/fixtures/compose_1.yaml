@@ -9,9 +9,13 @@ busybox1:
   links:
     - busybox2
   command: ping busybox2
+  environment:
+    - MYENV1=variable1
 
 busybox2:
   image: busybox
   expose:
     - "6000"
   command: ping localhost
+  environment:
+    MYENV2: variable2
