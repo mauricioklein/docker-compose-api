@@ -5,7 +5,7 @@ describe ComposeContainer do
     before(:all) do
       @attributes = {
         image: 'busybox:latest',
-        links: ['service:label'],
+        links: ['service1:label', 'service2'],
         ports: ['3000', '8000:8000', '127.0.0.1:8001:8001'],
         volumes: {'/tmp' => {}},
         command: 'ping -c 3 localhost',
@@ -17,7 +17,8 @@ describe ComposeContainer do
 
     it 'should prepare attributes correctly' do
       expect(@entry.attributes[:image]).to eq(@attributes[:image])
-      expect(@entry.attributes[:links]).to eq({'service' => 'label'})
+      expect(@entry.attributes[:links])
+        .to eq({'service1' => 'label', 'service2' => 'service2'})
       expect(@entry.attributes[:volumes]).to eq(@attributes[:volumes])
       expect(@entry.attributes[:command]).to eq(@attributes[:command].split(' '))
       expect(@entry.attributes[:environment]).to eq(@attributes[:environment])

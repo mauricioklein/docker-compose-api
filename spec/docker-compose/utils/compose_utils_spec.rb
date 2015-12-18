@@ -56,7 +56,7 @@ describe ComposeUtils do
     it 'should recognize pattern "[service]"' do
       links = ComposeUtils.format_links(['service'])
       expect(links.key?('service')).to be true
-      expect(links['service']).to_not be_nil
+      expect(links['service']).to eq('service')
     end
 
     it 'should recognize pattern "[service:label]"' do

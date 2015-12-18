@@ -14,7 +14,7 @@ describe DockerCompose do
   end
 
   it 'should read a YAML file correctly' do
-    expect(@compose.containers.length).to eq(2)
+    expect(@compose.containers.length).to eq(3)
   end
 
   it 'should raise error when reading an invalid YAML file' do
@@ -55,7 +55,7 @@ describe DockerCompose do
     context 'Without dependencies' do
       it 'should start/stop a single container' do
         container1 = @compose.containers.values.first.attributes[:label]
-        container2 = @compose.containers.values.last.attributes[:label]
+        container2 = @compose.containers.values[1].attributes[:label]
 
         # Should start Redis only, since it hasn't dependencies
         @compose.start([container2])
@@ -70,7 +70,7 @@ describe DockerCompose do
 
       it 'should start/kill a single container' do
         container1 = @compose.containers.values.first.attributes[:label]
-        container2 = @compose.containers.values.last.attributes[:label]
+        container2 = @compose.containers.values[1].attributes[:label]
 
         # Should start Redis only, since it hasn't dependencies
         @compose.start([container2])
@@ -87,7 +87,7 @@ describe DockerCompose do
     context 'With dependencies' do
       it 'should start/stop a single container' do
         container1 = @compose.containers.values.first.attributes[:label]
-        container2 = @compose.containers.values.last.attributes[:label]
+        container2 = @compose.containers.values[1].attributes[:label]
 
         # Should start Ubuntu and Redis, since Ubuntu depends on Redis
         @compose.start([container1])
@@ -106,7 +106,7 @@ describe DockerCompose do
 
       it 'should start/kill a single container' do
         container1 = @compose.containers.values.first.attributes[:label]
-        container2 = @compose.containers.values.last.attributes[:label]
+        container2 = @compose.containers.values[1].attributes[:label]
 
         # Should start Ubuntu and Redis, since Ubuntu depends on Redis
         @compose.start([container1])
@@ -125,7 +125,7 @@ describe DockerCompose do
 
       it 'should be able to ping a dependent container' do
         container1 = @compose.containers.values.first.attributes[:label]
-        container2 = @compose.containers.values.last.attributes[:label]
+        container2 = @compose.containers.values[1].attributes[:label]
 
         # Start all containers
         @compose.start
@@ -134,6 +134,20 @@ describe DockerCompose do
 
         # Ping container2 from container1
         ping_response = @compose.containers[container1].container.exec(['ping', '-c', '3', 'busybox2'])
+        expect(ping_response[2]).to eq(0) # Status 0 = OK
+      end
+
+      it 'should be able to ping a dependent aliased container' do
+        container2 = @compose.containers.values[1].attributes[:label]
+        container3 = @compose.containers.values[2].attributes[:label]
+
+        # Start all containers
+        @compose.start
+        expect(@compose.containers[container2].running?).to be true
+        expect(@compose.containers[container3].running?).to be true
+
+        # Ping container3 from container1
+        ping_response = @compose.containers[container3].container.exec(['ping', '-c', '3', 'bb2'])
         expect(ping_response[2]).to eq(0) # Status 0 = OK
       end
     end # context 'with dependencies'
@@ -191,7 +205,7 @@ describe DockerCompose do
   end
 
   it 'supports setting environment as hash' do
-    container1 = @compose.containers.values.last
+    container1 = @compose.containers.values[1]
 
     # Start container
     container1.start
