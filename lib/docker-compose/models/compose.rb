@@ -58,14 +58,25 @@ class Compose
   end
 
   #
-  # Stop a container
+  # Kill a container
   #
   # This method accepts an array of labels.
-  # If labels is informed, only those containers with label present in array will be stopped.
-  # Otherwise, all containers are stopped
+  # If labels is informed, only those containers with label present in array will be killed.
+  # Otherwise, all containers are killed
   #
   def kill(labels  = [])
     call_container_method(:kill, labels)
+  end
+
+  #
+  # Delete a container
+  #
+  # This method accepts an array of labels.
+  # If labels is informed, only those containers with label present in array will be deleted.
+  # Otherwise, all containers are deleted
+  #
+  def delete(labels = [])
+    call_container_method(:delete, labels)
   end
 
   private

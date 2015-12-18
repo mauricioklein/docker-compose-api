@@ -203,4 +203,11 @@ class ComposeContainer
   def running?
     @container.nil? ? false : self.stats['State']['Running']
   end
+
+  #
+  # Check if the container exists or not
+  #
+  def exist?
+    !@container.nil?
+  end
 end

@@ -49,6 +49,20 @@ describe DockerCompose do
         expect(container.running?).to be false
       end
     end
+
+    it 'should start/delete all containers' do
+      # Start containers to test Delete
+      @compose.start
+      @compose.containers.values.each do |container|
+        expect(container.running?).to be true
+      end
+
+      # Delete containers
+      @compose.delete
+      @compose.containers.values.each do |container|
+        expect(container.exist?).to be false
+      end
+    end
   end
 
   context 'Single container' do
@@ -204,8 +218,6 @@ describe DockerCompose do
   end
 
   after(:all) do
-    @compose.containers.values.each do |entry|
-      entry.delete
-    end
+    @compose.delete
   end
 end

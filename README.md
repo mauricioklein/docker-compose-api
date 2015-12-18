@@ -61,6 +61,11 @@ compose.stop(['container1', 'container2', ...]) # stop a list of specific contai
 compose.kill                                    # kill all containers
 compose.kill(['container1', 'container2', ...]) # kill a list of specific containers
 
+# Deleting containers
+# (ps: container dependencies will keep running)
+compose.delete                                    # delete all containers
+compose.delete(['container1', 'container2', ...]) # delete a list of specific containers
+
 # Checking if a container is running or not
 a_container = compose.containers['a_container']
 a_container.running?
