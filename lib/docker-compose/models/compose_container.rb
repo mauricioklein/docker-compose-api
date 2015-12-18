@@ -164,7 +164,7 @@ class ComposeContainer
   # Stop the container
   #
   def stop
-    @container.kill unless @container.nil?
+    @container.stop unless @container.nil?
   end
 
   #
