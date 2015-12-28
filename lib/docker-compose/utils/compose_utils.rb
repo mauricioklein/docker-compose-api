@@ -62,6 +62,8 @@ module ComposeUtils
   # Generate a pair key:hash with
   # format {service:label}
   #
+  # The label will be the conainer name if not specified.
+  #
   def self.format_links(links_array)
     links = {}
 
@@ -72,7 +74,7 @@ module ComposeUtils
 
       case parts.length
         when 1
-          links[parts[0]] = SecureRandom.hex
+          links[parts[0]] = parts[0]
 
         when 2
           links[parts[0]] = parts[1]

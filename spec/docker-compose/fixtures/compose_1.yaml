@@ -19,3 +19,9 @@ busybox2:
   command: ping localhost
   environment:
     MYENV2: variable2
+
+busybox3:
+  image: busybox
+  links:
+    - busybox2:bb2
+  command: ping localhost
