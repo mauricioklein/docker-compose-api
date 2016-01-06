@@ -19,7 +19,7 @@ gem install docker-compose-api
 
 ```ruby
 # Add the line below on your Gemfile...
-gem 'docker-compose-api', git: 'https://github.com/mauricioklein/docker-compose-api'
+gem 'docker-compose-api'
 
 # ... and run bundle install
 bundle install
