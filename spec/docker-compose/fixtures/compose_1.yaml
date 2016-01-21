@@ -1,5 +1,6 @@
 busybox1:
   image: busybox
+  container_name: busybox-container
   ports:
     - "3000"
     - "8000:8000"

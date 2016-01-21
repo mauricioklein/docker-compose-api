@@ -38,6 +38,7 @@ module DockerCompose
   def self.create_container(attributes)
     ComposeContainer.new({
       label: attributes[0],
+      name: attributes[1]['container_name'],
       image: attributes[1]['image'],
       build: attributes[1]['build'],
       links: attributes[1]['links'],

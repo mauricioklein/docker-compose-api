@@ -5,6 +5,7 @@ describe ComposeContainer do
     before(:all) do
       @attributes = {
         image: 'busybox:latest',
+        name: SecureRandom.hex,
         links: ['service1:label', 'service2'],
         ports: ['3000', '8000:8000', '127.0.0.1:8001:8001'],
         volumes: {'/tmp' => {}},
@@ -17,6 +18,7 @@ describe ComposeContainer do
 
     it 'should prepare attributes correctly' do
       expect(@entry.attributes[:image]).to eq(@attributes[:image])
+      expect(@entry.attributes[:name]).to eq(@attributes[:name])
       expect(@entry.attributes[:links])
         .to eq({'service1' => 'label', 'service2' => 'service2'})
       expect(@entry.attributes[:volumes]).to eq(@attributes[:volumes])
@@ -50,15 +52,17 @@ describe ComposeContainer do
 
   context 'From image' do
     before(:all) do
-      attributes = {
+      @attributes = {
         image: 'busybox:latest',
+        name: SecureRandom.hex,
         links: ['links:links'],
         volumes: {'/tmp' => {}},
         command: 'ping -c 3 localhost',
         environment: ['ENVIRONMENT']
       }
 
-      @entry = ComposeContainer.new(attributes)
+      @entry = ComposeContainer.new(@attributes)
+      @entry_autogen_name = ComposeContainer.new(@attributes.reject{|key| key == :name})
     end
 
     it 'should start/stop a container' do
@@ -81,6 +85,26 @@ describe ComposeContainer do
       # Stop container
       @entry.stop
       expect(@entry.running?).to be false
+    end
+
+    it 'should assign a given name to container' do
+      #Start container
+      @entry.start
+
+      expect(@entry.stats['Name']).to eq("/#{@attributes[:name]}")
+
+      # Stop container
+      @entry.stop
+    end
+
+    it 'should assign a random name to container when name is not given' do
+      #Start container
+      @entry_autogen_name.start
+
+      expect(@entry_autogen_name.stats['Name']).to_not be_nil
+
+      # Stop container
+      @entry_autogen_name.stop
     end
   end
 

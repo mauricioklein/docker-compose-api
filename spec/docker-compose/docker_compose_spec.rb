@@ -231,6 +231,32 @@ describe DockerCompose do
     container1.stop
   end
 
+  it 'should assing given name to container' do
+    container = @compose.containers.values[0]
+
+    # Start container
+    container.start
+
+    container_name = container.stats['Name']
+    expect(container_name).to eq('/busybox-container')
+
+    # Stop container
+    container.stop
+  end
+
+  it 'should assing a random name to container when name is not given' do
+    container = @compose.containers.values[1]
+
+    # Start container
+    container.start
+
+    container_name = container.stats['Name']
+    expect(container_name).to_not be_nil
+
+    # Stop container
+    container.stop
+  end
+
   after(:all) do
     @compose.delete
   end
