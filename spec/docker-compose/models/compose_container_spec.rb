@@ -4,10 +4,12 @@ describe ComposeContainer do
   context 'Object creation' do
     before(:all) do
       @attributes = {
+        label: SecureRandom.hex,
         image: 'busybox:latest',
+        name: SecureRandom.hex,
         links: ['service1:label', 'service2'],
         ports: ['3000', '8000:8000', '127.0.0.1:8001:8001'],
-        volumes: {'/tmp' => {}},
+        volumes: ['/tmp'],
         command: 'ping -c 3 localhost',
         environment: ['ENVIRONMENT']
       }
@@ -17,6 +19,7 @@ describe ComposeContainer do
 
     it 'should prepare attributes correctly' do
       expect(@entry.attributes[:image]).to eq(@attributes[:image])
+      expect(@entry.attributes[:name]).to eq(@attributes[:name])
       expect(@entry.attributes[:links])
         .to eq({'service1' => 'label', 'service2' => 'service2'})
       expect(@entry.attributes[:volumes]).to eq(@attributes[:volumes])
@@ -50,15 +53,18 @@ describe ComposeContainer do
 
   context 'From image' do
     before(:all) do
-      attributes = {
+      @attributes = {
+        label: SecureRandom.hex,
         image: 'busybox:latest',
+        name: SecureRandom.hex,
         links: ['links:links'],
-        volumes: {'/tmp' => {}},
+        volumes: ['/tmp'],
         command: 'ping -c 3 localhost',
         environment: ['ENVIRONMENT']
       }
 
-      @entry = ComposeContainer.new(attributes)
+      @entry = ComposeContainer.new(@attributes)
+      @entry_autogen_name = ComposeContainer.new(@attributes.reject{|key| key == :name})
     end
 
     it 'should start/stop a container' do
@@ -82,6 +88,26 @@ describe ComposeContainer do
       @entry.stop
       expect(@entry.running?).to be false
     end
+
+    it 'should assign a given name to container' do
+      #Start container
+      @entry.start
+
+      expect(@entry.stats['Name']).to eq("/#{@attributes[:name]}")
+
+      # Stop container
+      @entry.stop
+    end
+
+    it 'should assign label to container name when name is not given' do
+      #Start container
+      @entry_autogen_name.start
+
+      expect(@entry_autogen_name.stats['Name']).to eq("/#{@entry_autogen_name.attributes[:label]}")
+
+      # Stop container
+      @entry_autogen_name.stop
+    end
   end
 
   context 'From Dockerfile' do
@@ -89,7 +115,7 @@ describe ComposeContainer do
       attributes = {
         build: File.expand_path('spec/docker-compose/fixtures/'),
         links: ['links:links'],
-        volumes: {'/tmp' => {}}
+        volumes: ['/tmp']
       }
 
       @entry = ComposeContainer.new(attributes)
@@ -122,7 +148,7 @@ describe ComposeContainer do
     before(:all) do
       attributes = {
         links: ['links:links'],
-        volumes: {'/tmp' => {}},
+        volumes: ['/tmp'],
         command: 'ps aux',
         environment: ['ENVIRONMENT']
       }
@@ -148,6 +174,33 @@ describe ComposeContainer do
 
     it 'should prepare environment attribute correctly' do
       expect(@entry.attributes[:environment]).to eq(%w(ENVIRONMENT=VALUE))
+    end
+  end
+
+  describe '#prepare_volumes' do
+    let(:attributes) do
+      { image: 'busybox:latest' }
+    end
+
+    it 'correctly parses container-only volumes' do
+      attributes[:volumes] = ['/tmp']
+      entry = ComposeContainer.new(attributes)
+      volumes = entry.send(:prepare_volumes)
+      expect(volumes).to eq({ '/tmp' => {} })
+    end
+
+    it 'correctly parses host-container mapped volumes' do
+      attributes[:volumes] = ['./tmp:/tmp']
+      entry = ComposeContainer.new(attributes)
+      volumes = entry.send(:prepare_volumes)
+      expect(volumes).to eq({ '/tmp' => { './tmp' => 'rw' } })
+    end
+
+    it 'correctly parses host-container mapped volumes with access rights' do
+      attributes[:volumes] = ['./tmp:/tmp:ro']
+      entry = ComposeContainer.new(attributes)
+      volumes = entry.send(:prepare_volumes)
+      expect(volumes).to eq({ '/tmp' => { './tmp' => 'ro' } })
     end
   end
 end

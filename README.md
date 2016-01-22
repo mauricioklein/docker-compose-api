@@ -44,8 +44,9 @@ DockerCompose.version
 compose = DockerCompose.load('[path to docker compose file]')
 
 # Accessing containers
-compose.containers                     # access all containers
-compose.containers['[container name]'] # access a specific container
+compose.containers                                   # access all containers
+compose.containers['container_label']                # access a container by its label (DEPRECATED)
+compose.get_containers_by(label: 'foo', name: 'bar') # Returns an array of all containers with label = 'foo' and name = bar
 
 # Starting containers (and their dependencies)
 compose.start                                    # start all containers
@@ -67,7 +68,7 @@ compose.delete                                    # delete all containers
 compose.delete(['container1', 'container2', ...]) # delete a list of specific containers
 
 # Checking if a container is running or not
-a_container = compose.containers['a_container']
+a_container = compose.get_containers_by(name: 'a_container').first
 a_container.running?
 
 # Accessing container informations

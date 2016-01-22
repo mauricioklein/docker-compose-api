@@ -18,9 +18,9 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "docker-api", "~> 1.22.2"
+  spec.add_dependency "docker-api", "1.22.2"
 
-  spec.add_development_dependency "bundler"
-  spec.add_development_dependency "rspec"
-  spec.add_development_dependency "simplecov"
+  spec.add_development_dependency "bundler", "~> 1.7"
+  spec.add_development_dependency "rspec", "~> 3.3"
+  spec.add_development_dependency "simplecov", "~> 0.10"
 end

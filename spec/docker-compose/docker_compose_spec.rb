@@ -205,6 +205,19 @@ describe DockerCompose do
     container1.stop
   end
 
+  it 'binds volumes' do
+    container1 = @compose.containers.values.first
+
+    # Start container
+    container1.start
+
+    volumes = container1.stats['HostConfig']['Binds']
+    expect(volumes).to match_array(['/tmp/test:/tmp:ro'])
+
+    # Stop container
+    container1.stop
+  end
+
   it 'supports setting environment as array' do
     container1 = @compose.containers.values.first
 
@@ -229,6 +242,42 @@ describe DockerCompose do
 
     # Stop container
     container1.stop
+  end
+
+  it 'should assing given name to container' do
+    container = @compose.containers.values[0]
+
+    # Start container
+    container.start
+
+    container_name = container.stats['Name']
+    expect(container_name).to eq('/busybox-container')
+
+    # Stop container
+    container.stop
+  end
+
+  it 'should assing a random name to container when name is not given' do
+    container = @compose.containers.values[1]
+
+    # Start container
+    container.start
+
+    container_name = container.stats['Name']
+    expect(container_name).to_not be_nil
+
+    # Stop container
+    container.stop
+  end
+
+  it 'should filter containers by its attributes' do
+    expect(@compose.get_containers_by(label: 'busybox2')).to eq([@compose.containers['busybox2']])
+    expect(@compose.get_containers_by(name: 'busybox-container')).to eq([@compose.containers['busybox1']])
+    expect(@compose.get_containers_by(image: 'busybox:latest')).to eq([
+        @compose.containers['busybox1'],
+        @compose.containers['busybox2'],
+        @compose.containers['busybox3']
+    ])
   end
 
   after(:all) do

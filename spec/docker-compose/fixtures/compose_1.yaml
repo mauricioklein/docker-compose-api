@@ -1,5 +1,6 @@
 busybox1:
   image: busybox
+  container_name: busybox-container
   ports:
     - "3000"
     - "8000:8000"
@@ -11,6 +12,8 @@ busybox1:
   command: ping busybox2
   environment:
     - MYENV1=variable1
+  volumes:
+    - "/tmp/test:/tmp:ro"
 
 busybox2:
   image: busybox

@@ -9,6 +9,7 @@ class ComposeContainer
   def initialize(hash_attributes)
     @attributes = {
       label: hash_attributes[:label],
+      name: hash_attributes[:name].nil? ? hash_attributes[:label] : hash_attributes[:name],
       image: ComposeUtils.format_image(hash_attributes[:image]),
       build: hash_attributes[:build],
       links: ComposeUtils.format_links(hash_attributes[:links]),
@@ -54,6 +55,8 @@ class ComposeContainer
     # Prepare attributes
     port_bindings = prepare_port_bindings
     links = prepare_links
+    volumes = prepare_volumes
+    volume_binds = @attributes[:volumes] && @attributes[:volumes].reject { |volume| volume.split(':').one? }
 
     # Exposed ports are port bindings with an empty hash as value
     exposed_ports = {}
@@ -63,15 +66,19 @@ class ComposeContainer
       Image: @internal_image,
       Cmd: @attributes[:command],
       Env: @attributes[:environment],
-      Volumes: @attributes[:volumes],
+      Volumes: volumes,
       ExposedPorts: exposed_ports,
       HostConfig: {
+        Binds: volume_binds,
         Links: links,
         PortBindings: port_bindings
       }
     }
 
-    @container = Docker::Container.create(container_config)
+    query_params = { 'name' => @attributes[:name] }
+
+    params = container_config.merge(query_params)
+    @container = Docker::Container.create(params)
   end
 
   #
@@ -106,6 +113,28 @@ class ComposeContainer
     end
 
     links
+  end
+
+  #
+  # Transforms an array of [(host:)container(:accessmode)] to a hash
+  # required by the Docker api.
+  #
+  def prepare_volumes
+    return unless @attributes[:volumes]
+
+    volumes = {}
+
+    @attributes[:volumes].each do |volume|
+      parts = volume.split(':')
+
+      if parts.one?
+        volumes[parts[0]] = {}
+      else
+        volumes[parts[1]] = { parts[0] => parts[2] || 'rw' }
+      end
+    end
+
+    volumes
   end
 
   #
