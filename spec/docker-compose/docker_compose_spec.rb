@@ -211,7 +211,6 @@ describe DockerCompose do
     # Start container
     container1.start
 
-    puts container1.stats['HostConfig']['Binds'].inspect
     volumes = container1.stats['HostConfig']['Binds']
     expect(volumes).to match_array(['/tmp/test:/tmp:ro'])
 
@@ -269,6 +268,16 @@ describe DockerCompose do
 
     # Stop container
     container.stop
+  end
+
+  it 'should filter containers by its attributes' do
+    expect(@compose.get_containers_by(label: 'busybox2')).to eq([@compose.containers['busybox2']])
+    expect(@compose.get_containers_by(name: 'busybox-container')).to eq([@compose.containers['busybox1']])
+    expect(@compose.get_containers_by(image: 'busybox:latest')).to eq([
+        @compose.containers['busybox1'],
+        @compose.containers['busybox2'],
+        @compose.containers['busybox3']
+    ])
   end
 
   after(:all) do

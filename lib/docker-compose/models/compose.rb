@@ -20,6 +20,15 @@ class Compose
   end
 
   #
+  # Select containers based on attributes given by "params"
+  #
+  def get_containers_by(params)
+    @containers.values.select do |container|
+      (params.to_a - container.attributes.to_a).empty?
+    end
+  end
+
+  #
   # Create link relations among containers
   #
   def link_containers
