@@ -9,6 +9,7 @@ class ComposeContainer
   def initialize(hash_attributes)
     @attributes = {
       label: hash_attributes[:label],
+      name: hash_attributes[:name].nil? ? hash_attributes[:label] : hash_attributes[:name],
       image: ComposeUtils.format_image(hash_attributes[:image]),
       build: hash_attributes[:build],
       links: ComposeUtils.format_links(hash_attributes[:links]),
@@ -74,7 +75,10 @@ class ComposeContainer
       }
     }
 
-    @container = Docker::Container.create(container_config)
+    query_params = { 'name' => @attributes[:name] }
+
+    params = container_config.merge(query_params)
+    @container = Docker::Container.create(params)
   end
 
   #
