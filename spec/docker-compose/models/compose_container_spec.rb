@@ -4,6 +4,7 @@ describe ComposeContainer do
   context 'Object creation' do
     before(:all) do
       @attributes = {
+        label: SecureRandom.hex,
         image: 'busybox:latest',
         name: SecureRandom.hex,
         links: ['service1:label', 'service2'],
@@ -53,6 +54,7 @@ describe ComposeContainer do
   context 'From image' do
     before(:all) do
       @attributes = {
+        label: SecureRandom.hex,
         image: 'busybox:latest',
         name: SecureRandom.hex,
         links: ['links:links'],
@@ -97,11 +99,11 @@ describe ComposeContainer do
       @entry.stop
     end
 
-    it 'should assign a random name to container when name is not given' do
+    it 'should assign label to container name when name is not given' do
       #Start container
       @entry_autogen_name.start
 
-      expect(@entry_autogen_name.stats['Name']).to_not be_nil
+      expect(@entry_autogen_name.stats['Name']).to eq("/#{@entry_autogen_name.attributes[:label]}")
 
       # Stop container
       @entry_autogen_name.stop
