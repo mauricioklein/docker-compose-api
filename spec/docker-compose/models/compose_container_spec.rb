@@ -8,7 +8,7 @@ describe ComposeContainer do
         name: SecureRandom.hex,
         links: ['service1:label', 'service2'],
         ports: ['3000', '8000:8000', '127.0.0.1:8001:8001'],
-        volumes: {'/tmp' => {}},
+        volumes: ['/tmp'],
         command: 'ping -c 3 localhost',
         environment: ['ENVIRONMENT']
       }
@@ -56,7 +56,7 @@ describe ComposeContainer do
         image: 'busybox:latest',
         name: SecureRandom.hex,
         links: ['links:links'],
-        volumes: {'/tmp' => {}},
+        volumes: ['/tmp'],
         command: 'ping -c 3 localhost',
         environment: ['ENVIRONMENT']
       }
@@ -113,7 +113,7 @@ describe ComposeContainer do
       attributes = {
         build: File.expand_path('spec/docker-compose/fixtures/'),
         links: ['links:links'],
-        volumes: {'/tmp' => {}}
+        volumes: ['/tmp']
       }
 
       @entry = ComposeContainer.new(attributes)
@@ -146,7 +146,7 @@ describe ComposeContainer do
     before(:all) do
       attributes = {
         links: ['links:links'],
-        volumes: {'/tmp' => {}},
+        volumes: ['/tmp'],
         command: 'ps aux',
         environment: ['ENVIRONMENT']
       }
@@ -172,6 +172,33 @@ describe ComposeContainer do
 
     it 'should prepare environment attribute correctly' do
       expect(@entry.attributes[:environment]).to eq(%w(ENVIRONMENT=VALUE))
+    end
+  end
+
+  describe '#prepare_volumes' do
+    let(:attributes) do
+      { image: 'busybox:latest' }
+    end
+
+    it 'correctly parses container-only volumes' do
+      attributes[:volumes] = ['/tmp']
+      entry = ComposeContainer.new(attributes)
+      volumes = entry.send(:prepare_volumes)
+      expect(volumes).to eq({ '/tmp' => {} })
+    end
+
+    it 'correctly parses host-container mapped volumes' do
+      attributes[:volumes] = ['./tmp:/tmp']
+      entry = ComposeContainer.new(attributes)
+      volumes = entry.send(:prepare_volumes)
+      expect(volumes).to eq({ '/tmp' => { './tmp' => 'rw' } })
+    end
+
+    it 'correctly parses host-container mapped volumes with access rights' do
+      attributes[:volumes] = ['./tmp:/tmp:ro']
+      entry = ComposeContainer.new(attributes)
+      volumes = entry.send(:prepare_volumes)
+      expect(volumes).to eq({ '/tmp' => { './tmp' => 'ro' } })
     end
   end
 end
