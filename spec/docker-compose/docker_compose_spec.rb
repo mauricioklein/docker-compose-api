@@ -205,6 +205,20 @@ describe DockerCompose do
     container1.stop
   end
 
+  it 'binds volumes' do
+    container1 = @compose.containers.values.first
+
+    # Start container
+    container1.start
+
+    puts container1.stats['HostConfig']['Binds'].inspect
+    volumes = container1.stats['HostConfig']['Binds']
+    expect(volumes).to match_array(['/tmp/test:/tmp:ro'])
+
+    # Stop container
+    container1.stop
+  end
+
   it 'supports setting environment as array' do
     container1 = @compose.containers.values.first
 

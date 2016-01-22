@@ -11,6 +11,8 @@ busybox1:
   command: ping busybox2
   environment:
     - MYENV1=variable1
+  volumes:
+    - "/tmp/test:/tmp:ro"
 
 busybox2:
   image: busybox
