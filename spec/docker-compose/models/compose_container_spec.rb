@@ -11,7 +11,8 @@ describe ComposeContainer do
         ports: ['3000', '8000:8000', '127.0.0.1:8001:8001'],
         volumes: ['/tmp'],
         command: 'ping -c 3 localhost',
-        environment: ['ENVIRONMENT']
+        environment: ['ENVIRONMENT'],
+        labels: { 'com.example.foo' => 'bar' }
       }
 
       @entry = ComposeContainer.new(@attributes)
@@ -25,6 +26,7 @@ describe ComposeContainer do
       expect(@entry.attributes[:volumes]).to eq(@attributes[:volumes])
       expect(@entry.attributes[:command]).to eq(@attributes[:command].split(' '))
       expect(@entry.attributes[:environment]).to eq(@attributes[:environment])
+      expect(@entry.attributes[:labels]).to eq(@attributes[:labels])
     end
 
     it 'should map ports' do

@@ -16,7 +16,8 @@ class ComposeContainer
       ports: prepare_ports(hash_attributes[:ports]),
       volumes: hash_attributes[:volumes],
       command: ComposeUtils.format_command(hash_attributes[:command]),
-      environment: prepare_environment(hash_attributes[:environment])
+      environment: prepare_environment(hash_attributes[:environment]),
+      labels: prepare_labels(hash_attributes[:labels])
     }.reject{ |key, value| value.nil? }
 
     # Docker client variables
@@ -68,6 +69,7 @@ class ComposeContainer
       Env: @attributes[:environment],
       Volumes: volumes,
       ExposedPorts: exposed_ports,
+      Labels: @attributes[:labels],
       HostConfig: {
         Binds: volume_binds,
         Links: links,
@@ -161,6 +163,14 @@ class ComposeContainer
   def prepare_environment(env_entries)
     return env_entries unless env_entries.is_a?(Hash)
     env_entries.to_a.map { |x| x.join('=') }
+  end
+
+  #
+  # Forces the labels structure to use the hash format.
+  #
+  def prepare_labels(labels)
+    return labels unless labels.is_a?(Array)
+    Hash[labels.map { |label| label.split('=') }]
   end
 
   #

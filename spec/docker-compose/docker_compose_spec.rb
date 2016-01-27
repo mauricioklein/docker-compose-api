@@ -244,6 +244,32 @@ describe DockerCompose do
     container1.stop
   end
 
+  it 'supports setting labels as an array' do
+    container = @compose.get_containers_by(label: 'busybox1').first
+
+    # Start container
+    container.start
+
+    env = container.stats['Config']['Labels']
+    expect(env).to eq({ 'com.example.foo' => 'bar' })
+
+    # Stop container
+    container.stop
+  end
+
+  it 'supports setting labels as a hash' do
+    container = @compose.get_containers_by(label: 'busybox2').first
+
+    # Start container
+    container.start
+
+    env = container.stats['Config']['Labels']
+    expect(env).to eq({ 'com.example.foo' => 'bar' })
+
+    # Stop container
+    container.stop
+  end
+
   it 'should assing given name to container' do
     container = @compose.containers.values[0]
 
