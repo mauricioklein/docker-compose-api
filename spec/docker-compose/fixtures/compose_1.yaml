@@ -14,6 +14,8 @@ busybox1:
     - MYENV1=variable1
   volumes:
     - "/tmp/test:/tmp:ro"
+  labels:
+    - com.example.foo=bar
 
 busybox2:
   image: busybox
@@ -22,6 +24,8 @@ busybox2:
   command: ping localhost
   environment:
     MYENV2: variable2
+  labels:
+    com.example.foo: bar
 
 busybox3:
   image: busybox

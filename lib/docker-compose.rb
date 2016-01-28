@@ -45,7 +45,8 @@ module DockerCompose
       ports: attributes[1]['ports'],
       volumes: attributes[1]['volumes'],
       command: attributes[1]['command'],
-      environment: attributes[1]['environment']
+      environment: attributes[1]['environment'],
+      labels: attributes[1]['labels']
     })
   end
 
