@@ -168,13 +168,13 @@ describe DockerCompose do
   end # context 'Single container'
 
   it 'should assign ports' do
-    container1 = @compose.containers.values.first
+    container = @compose.get_containers_by(label: 'busybox1').first
 
     # Start container
-    container1.start
+    container.start
 
-    port_bindings = container1.stats['HostConfig']['PortBindings']
-    exposed_ports = container1.stats['Config']['ExposedPorts']
+    port_bindings = container.stats['HostConfig']['PortBindings']
+    exposed_ports = container.stats['Config']['ExposedPorts']
 
     # Check port bindings
     expect(port_bindings.length).to eq(3)
@@ -188,60 +188,60 @@ describe DockerCompose do
     expect(exposed_ports.key?('8001/tcp')).to be true
 
     # Stop container
-    container1.stop
+    container.stop
   end
 
   it 'should link containers' do
-    container1 = @compose.containers.values.first
+    container = @compose.get_containers_by(label: 'busybox1').first
 
     # Start container
-    container1.start
+    container.start
 
     # Ubuntu should be linked to Redis
-    links = container1.stats['HostConfig']['Links']
+    links = container.stats['HostConfig']['Links']
     expect(links.length).to eq(1)
 
     # Stop container
-    container1.stop
+    container.stop
   end
 
   it 'binds volumes' do
-    container1 = @compose.containers.values.first
+    container = @compose.get_containers_by(label: 'busybox1').first
 
     # Start container
-    container1.start
+    container.start
 
-    volumes = container1.stats['HostConfig']['Binds']
+    volumes = container.stats['HostConfig']['Binds']
     expect(volumes).to match_array(['/tmp/test:/tmp:ro'])
 
     # Stop container
-    container1.stop
+    container.stop
   end
 
   it 'supports setting environment as array' do
-    container1 = @compose.containers.values.first
+    container = @compose.get_containers_by(label: 'busybox1').first
 
     # Start container
-    container1.start
+    container.start
 
-    env = container1.stats['Config']['Env']
+    env = container.stats['Config']['Env']
     expect(env).to eq(%w(MYENV1=variable1))
 
     # Stop container
-    container1.stop
+    container.stop
   end
 
   it 'supports setting environment as hash' do
-    container1 = @compose.containers.values[1]
+    container = @compose.get_containers_by(label: 'busybox2').first
 
     # Start container
-    container1.start
+    container.start
 
-    env = container1.stats['Config']['Env']
+    env = container.stats['Config']['Env']
     expect(env).to eq(%w(MYENV2=variable2))
 
     # Stop container
-    container1.stop
+    container.stop
   end
 
   it 'supports setting labels as an array' do
@@ -271,7 +271,7 @@ describe DockerCompose do
   end
 
   it 'should assing given name to container' do
-    container = @compose.containers.values[0]
+    container = @compose.get_containers_by(label: 'busybox1').first
 
     # Start container
     container.start
@@ -284,7 +284,7 @@ describe DockerCompose do
   end
 
   it 'should assing a random name to container when name is not given' do
-    container = @compose.containers.values[1]
+    container = @compose.get_containers_by(label: 'busybox2').first
 
     # Start container
     container.start
