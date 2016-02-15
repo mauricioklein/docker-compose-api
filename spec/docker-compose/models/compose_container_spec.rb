@@ -51,6 +51,10 @@ describe ComposeContainer do
       expect(port_entry.host_ip).to eq('127.0.0.1')
       expect(port_entry.host_port).to eq('8001')
     end
+
+    after(:all) do
+      @entry.delete
+    end
   end
 
   context 'From image' do
@@ -110,6 +114,11 @@ describe ComposeContainer do
       # Stop container
       @entry_autogen_name.stop
     end
+
+    after(:all) do
+      @entry.delete
+      @entry_autogen_name.delete
+    end
   end
 
   context 'From Dockerfile' do
@@ -145,6 +154,11 @@ describe ComposeContainer do
       @entry.stop
       expect(@entry.running?).to be false
     end
+
+    after(:all) do
+      Docker::Image.get(@entry.internal_image).remove(force: true)
+      @entry.delete
+    end
   end
 
   context 'Without image or Dockerfile' do
@@ -162,6 +176,10 @@ describe ComposeContainer do
     it 'should not start a container' do
       expect{@entry.start}.to raise_error(ArgumentError)
     end
+
+    after(:all) do
+      @entry.delete
+    end
   end
 
   context 'With environment as a hash' do
@@ -178,9 +196,13 @@ describe ComposeContainer do
     it 'should prepare environment attribute correctly' do
       expect(@entry.attributes[:environment]).to eq(%w(ENVIRONMENT=VALUE))
     end
+
+    after(:all) do
+      @entry.delete
+    end
   end
 
-  describe '#prepare_volumes' do
+  describe 'prepare_volumes' do
     let(:attributes) do
       { image: 'busybox:latest' }
     end

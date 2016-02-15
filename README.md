@@ -43,10 +43,25 @@ DockerCompose.version
 # Loading a compose file
 compose = DockerCompose.load('[path to docker compose file]')
 
+# 'Load' method accepts a second argument, telling to do load or not
+# containers started previously by this compose file.
+#
+# So, loading a compose file + containers started by this compose previously
+compose = DockerCompose.load('[path to docker compose file]', true)
+
 # Accessing containers
 compose.containers                                   # access all containers
 compose.containers['container_label']                # access a container by its label (DEPRECATED)
 compose.get_containers_by(label: 'foo', name: 'bar') # Returns an array of all containers with label = 'foo' and name = bar
+
+# Containers names are generated using the pattern below:
+#  [Directory name]_[Container label]_[Sequential ID]
+#
+# So, you can access a container by its full name...
+compose.get_containers_by(name: 'myawessomedir_foobar_1')
+
+# ... or by its given name (ignores both prefix and suffix)
+compose.get_containers_by_given_name('foobar')
 
 # Starting containers (and their dependencies)
 compose.start                                    # start all containers

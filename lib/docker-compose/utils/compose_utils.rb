@@ -84,6 +84,30 @@ module ComposeUtils
   end
 
   #
+  # Format ports from running container
+  #
+  def self.format_ports_from_running_container(port_entry)
+    entries = []
+    container_port = nil
+    host_ip = nil
+    host_port = nil
+
+    if port_entry.nil?
+      return entries
+    end
+
+    port_entry.each do |key, value|
+      container_port = key.gsub(/\D/, '').to_i
+      host_ip = value.first['HostIp']
+      host_port = value.first['HostPort']
+
+      entries << "#{container_port}:#{host_ip}:#{host_port}"
+    end
+
+    entries
+  end
+
+  #
   # Generate a pair key:hash with
   # format {service:label}
   #

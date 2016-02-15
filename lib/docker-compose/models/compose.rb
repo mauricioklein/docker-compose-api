@@ -15,6 +15,11 @@ class Compose
   # Add a new container to compose
   #
   def add_container(container)
+    # Avoid duplicated labels on compose
+    while @containers.has_key?(container.attributes[:label]) do
+      container.attributes[:label].succ!
+    end
+
     @containers[container.attributes[:label]] = container
     true
   end

@@ -17,16 +17,30 @@ module DockerCompose
   # Load a given docker-compose file.
   # Returns a new Compose object
   #
-  def self.load(filepath)
+  def self.load(filepath, do_load_running_containers = false)
     unless File.exist?(filepath)
       raise ArgumentError, 'Compose file doesn\'t exists'
     end
 
     compose = Compose.new
 
+    # Create containers from compose file
     _compose_entries = YAML.load_file(filepath)
-    _compose_entries.each do |entry|
-      compose.add_container(create_container(entry))
+
+    if _compose_entries
+      _compose_entries.each do |entry|
+        compose.add_container(create_container(entry))
+      end
+    end
+
+    # Load running containers
+    if do_load_running_containers
+      Docker::Container
+        .all(all: true)
+        .select {|c| c.info['Names'].last.match(/\A\/#{ComposeUtils.dir_name}\w*/) }
+        .each do |container|
+          compose.add_container(load_running_container(container))
+      end
     end
 
     # Perform containers linkage
@@ -50,5 +64,24 @@ module DockerCompose
     })
   end
 
-  private_class_method :create_container
+  def self.load_running_container(container)
+    info = container.json
+
+    container_args = {
+      label:       info['Name'].split(/_/)[1] || '',
+      full_name:   info['Name'],
+      image:       info['Image'],
+      build:       nil,
+      links:       info['HostConfig']['Links'],
+      ports:       ComposeUtils.format_ports_from_running_container(info['NetworkSettings']['Ports']),
+      volumes:     info['Config']['Volumes'],
+      command:     info['Config']['Cmd'].join(' '),
+      environment: info['Config']['Env'],
+      labels:      info['Config']['Labels']
+    }
+
+    ComposeContainer.new(container_args, container)
+  end
+
+  private_class_method :create_container, :load_running_container
 end

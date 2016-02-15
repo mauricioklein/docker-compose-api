@@ -52,6 +52,26 @@ describe ComposeUtils do
     end
   end
 
+  context 'Format ports from running containers' do
+    before(:all) do
+      @hash_attr = {
+        '8000/tcp' => [{
+          'HostIp' => '0.0.0.0',
+          'HostPort' => '4444'
+        }]
+      }
+      @expected_format = ['8000:0.0.0.0:4444']
+    end
+
+    it 'should format ports correctly' do
+      expect(ComposeUtils.format_ports_from_running_container(@hash_attr)).to eq(@expected_format)
+    end
+
+    it 'should return an empty array when ports are nil' do
+      expect(ComposeUtils.format_ports_from_running_container(nil)).to eq([])
+    end
+  end
+
   context 'Format links' do
     it 'should recognize pattern "[service]"' do
       links = ComposeUtils.format_links(['service'])
