@@ -29,6 +29,16 @@ class Compose
   end
 
   #
+  # Select containers based on its given name
+  # (ignore basename)
+  #
+  def get_containers_by_given_name(given_name)
+    @containers.select { |label, container|
+      container.attributes[:name].match(/\w*_#{given_name}_\d+/)
+    }.values
+  end
+
+  #
   # Create link relations among containers
   #
   def link_containers

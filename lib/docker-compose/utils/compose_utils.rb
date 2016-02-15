@@ -1,4 +1,29 @@
 module ComposeUtils
+  @dir_name = File.split(Dir.pwd).last.gsub(/[-_]/, '')
+  @current_container_id = nil
+
+  #
+  # Returns the directory name where compose
+  # file is saved (used in container naming)
+  #
+  def self.dir_name
+    @dir_name
+  end
+
+  #
+  # Provides the next available ID
+  # to container names
+  #
+  def self.next_available_id
+    if @current_container_id.nil?
+      # Discovery the max id used by already running containers
+      # (default to '0' if no container is running)
+      @current_container_id = Docker::Container.all(all: true).map {|c| c.info['Names'].last.split(/_/).last.to_i}.flatten.max || 0
+    end
+
+    @current_container_id += 1
+  end
+
   #
   # Format a given docker image in a complete structure (base image + tag)
   #
@@ -83,4 +108,19 @@ module ComposeUtils
 
     links
   end
+
+  #
+  # Generate a container name, based on:
+  # - directory where the compose file is saved;
+  # - container name (or label, if name isn't provided);
+  # - a sequential index;
+  #
+  def self.generate_container_name(container_name, container_label)
+    label = container_name.nil? ? container_label : container_name
+    index = next_available_id
+
+    "#{@dir_name}_#{label}_#{index}"
+  end
+
+  private_class_method :next_available_id
 end

@@ -277,7 +277,7 @@ describe DockerCompose do
     container.start
 
     container_name = container.stats['Name']
-    expect(container_name).to eq('/busybox-container')
+    expect(container_name).to match(/\/#{ComposeUtils.dir_name}_busybox-container_\d+/)
 
     # Stop container
     container.stop
@@ -298,7 +298,8 @@ describe DockerCompose do
 
   it 'should filter containers by its attributes' do
     expect(@compose.get_containers_by(label: 'busybox2')).to eq([@compose.containers['busybox2']])
-    expect(@compose.get_containers_by(name: 'busybox-container')).to eq([@compose.containers['busybox1']])
+    expect(@compose.get_containers_by(name: @compose.containers['busybox1'].attributes[:name])).to eq([@compose.containers['busybox1']])
+    expect(@compose.get_containers_by_given_name('busybox-container')).to eq([@compose.containers['busybox1']])
     expect(@compose.get_containers_by(image: 'busybox:latest')).to eq([
         @compose.containers['busybox1'],
         @compose.containers['busybox2'],

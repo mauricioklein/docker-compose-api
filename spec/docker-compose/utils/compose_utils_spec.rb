@@ -65,4 +65,21 @@ describe ComposeUtils do
       expect(links['service']).to eq('label')
     end
   end
+
+  context 'Generate container name' do
+    before(:all) do
+      @name = 'foo'
+      @label = 'bar'
+    end
+
+    it 'should generate name with given name' do
+      name = ComposeUtils.generate_container_name(@name, @label)
+      expect(name).to match(/#{ComposeUtils.dir_name}_#{@name}_\d+/)
+    end
+
+    it 'should generate name with label' do
+      name = ComposeUtils.generate_container_name(nil, @label)
+      expect(name).to match(/#{ComposeUtils.dir_name}_#{@label}_\d+/)
+    end
+  end
 end

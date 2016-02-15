@@ -20,7 +20,7 @@ describe ComposeContainer do
 
     it 'should prepare attributes correctly' do
       expect(@entry.attributes[:image]).to eq(@attributes[:image])
-      expect(@entry.attributes[:name]).to eq(@attributes[:name])
+      expect(@entry.attributes[:name]).to match(/#{ComposeUtils.dir_name}_#{@attributes[:name]}_\d+/)
       expect(@entry.attributes[:links])
         .to eq({'service1' => 'label', 'service2' => 'service2'})
       expect(@entry.attributes[:volumes]).to eq(@attributes[:volumes])
@@ -95,7 +95,7 @@ describe ComposeContainer do
       #Start container
       @entry.start
 
-      expect(@entry.stats['Name']).to eq("/#{@attributes[:name]}")
+      expect(@entry.stats['Name']).to match(/#{ComposeUtils.dir_name}_#{@attributes[:name]}_\d+/)
 
       # Stop container
       @entry.stop
@@ -105,7 +105,7 @@ describe ComposeContainer do
       #Start container
       @entry_autogen_name.start
 
-      expect(@entry_autogen_name.stats['Name']).to eq("/#{@entry_autogen_name.attributes[:label]}")
+      expect(@entry_autogen_name.stats['Name']).to match(/#{ComposeUtils.dir_name}_#{@entry_autogen_name.attributes[:label]}_\d+/)
 
       # Stop container
       @entry_autogen_name.stop
@@ -115,6 +115,7 @@ describe ComposeContainer do
   context 'From Dockerfile' do
     before(:all) do
       attributes = {
+        label: 'foobar',
         build: File.expand_path('spec/docker-compose/fixtures/'),
         links: ['links:links'],
         volumes: ['/tmp']
