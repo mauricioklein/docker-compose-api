@@ -39,7 +39,7 @@ class Compose
   #
   def get_containers_by_given_name(given_name)
     @containers.select { |label, container|
-      container.attributes[:name].match(/\w*_#{given_name}_\d+/)
+      container.attributes[:name].match(/#{ComposeUtils.dir_name}_#{given_name}_\d+/)
     }.values
   end
 
