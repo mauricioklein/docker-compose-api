@@ -52,6 +52,26 @@ describe ComposeUtils do
     end
   end
 
+  context 'Format ports from running containers' do
+    before(:all) do
+      @hash_attr = {
+        '8000/tcp' => [{
+          'HostIp' => '0.0.0.0',
+          'HostPort' => '4444'
+        }]
+      }
+      @expected_format = ['8000:0.0.0.0:4444']
+    end
+
+    it 'should format ports correctly' do
+      expect(ComposeUtils.format_ports_from_running_container(@hash_attr)).to eq(@expected_format)
+    end
+
+    it 'should return an empty array when ports are nil' do
+      expect(ComposeUtils.format_ports_from_running_container(nil)).to eq([])
+    end
+  end
+
   context 'Format links' do
     it 'should recognize pattern "[service]"' do
       links = ComposeUtils.format_links(['service'])
@@ -63,6 +83,23 @@ describe ComposeUtils do
       links = ComposeUtils.format_links(['service:label'])
       expect(links.key?('service')).to be true
       expect(links['service']).to eq('label')
+    end
+  end
+
+  context 'Generate container name' do
+    before(:all) do
+      @name = 'foo'
+      @label = 'bar'
+    end
+
+    it 'should generate name with given name' do
+      name = ComposeUtils.generate_container_name(@name, @label)
+      expect(name).to match(/#{ComposeUtils.dir_name}_#{@name}_\d+/)
+    end
+
+    it 'should generate name with label' do
+      name = ComposeUtils.generate_container_name(nil, @label)
+      expect(name).to match(/#{ComposeUtils.dir_name}_#{@label}_\d+/)
     end
   end
 end

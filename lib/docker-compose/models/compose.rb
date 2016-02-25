@@ -15,6 +15,11 @@ class Compose
   # Add a new container to compose
   #
   def add_container(container)
+    # Avoid duplicated labels on compose
+    while @containers.has_key?(container.attributes[:label]) do
+      container.attributes[:label].succ!
+    end
+
     @containers[container.attributes[:label]] = container
     true
   end
@@ -26,6 +31,16 @@ class Compose
     @containers.values.select do |container|
       (params.to_a - container.attributes.to_a).empty?
     end
+  end
+
+  #
+  # Select containers based on its given name
+  # (ignore basename)
+  #
+  def get_containers_by_given_name(given_name)
+    @containers.select { |label, container|
+      container.attributes[:name].match(/#{ComposeUtils.dir_name}_#{given_name}_\d+/)
+    }.values
   end
 
   #

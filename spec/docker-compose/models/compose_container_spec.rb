@@ -20,7 +20,7 @@ describe ComposeContainer do
 
     it 'should prepare attributes correctly' do
       expect(@entry.attributes[:image]).to eq(@attributes[:image])
-      expect(@entry.attributes[:name]).to eq(@attributes[:name])
+      expect(@entry.attributes[:name]).to match(/#{ComposeUtils.dir_name}_#{@attributes[:name]}_\d+/)
       expect(@entry.attributes[:links])
         .to eq({'service1' => 'label', 'service2' => 'service2'})
       expect(@entry.attributes[:volumes]).to eq(@attributes[:volumes])
@@ -50,6 +50,10 @@ describe ComposeContainer do
       expect(port_entry.container_port).to eq('8001')
       expect(port_entry.host_ip).to eq('127.0.0.1')
       expect(port_entry.host_port).to eq('8001')
+    end
+
+    after(:all) do
+      @entry.delete
     end
   end
 
@@ -95,7 +99,7 @@ describe ComposeContainer do
       #Start container
       @entry.start
 
-      expect(@entry.stats['Name']).to eq("/#{@attributes[:name]}")
+      expect(@entry.stats['Name']).to match(/#{ComposeUtils.dir_name}_#{@attributes[:name]}_\d+/)
 
       # Stop container
       @entry.stop
@@ -105,16 +109,22 @@ describe ComposeContainer do
       #Start container
       @entry_autogen_name.start
 
-      expect(@entry_autogen_name.stats['Name']).to eq("/#{@entry_autogen_name.attributes[:label]}")
+      expect(@entry_autogen_name.stats['Name']).to match(/#{ComposeUtils.dir_name}_#{@entry_autogen_name.attributes[:label]}_\d+/)
 
       # Stop container
       @entry_autogen_name.stop
+    end
+
+    after(:all) do
+      @entry.delete
+      @entry_autogen_name.delete
     end
   end
 
   context 'From Dockerfile' do
     before(:all) do
       attributes = {
+        label: 'foobar',
         build: File.expand_path('spec/docker-compose/fixtures/'),
         links: ['links:links'],
         volumes: ['/tmp']
@@ -144,6 +154,11 @@ describe ComposeContainer do
       @entry.stop
       expect(@entry.running?).to be false
     end
+
+    after(:all) do
+      Docker::Image.get(@entry.internal_image).remove(force: true)
+      @entry.delete
+    end
   end
 
   context 'Without image or Dockerfile' do
@@ -161,6 +176,10 @@ describe ComposeContainer do
     it 'should not start a container' do
       expect{@entry.start}.to raise_error(ArgumentError)
     end
+
+    after(:all) do
+      @entry.delete
+    end
   end
 
   context 'With environment as a hash' do
@@ -177,9 +196,13 @@ describe ComposeContainer do
     it 'should prepare environment attribute correctly' do
       expect(@entry.attributes[:environment]).to eq(%w(ENVIRONMENT=VALUE))
     end
+
+    after(:all) do
+      @entry.delete
+    end
   end
 
-  describe '#prepare_volumes' do
+  describe 'prepare_volumes' do
     let(:attributes) do
       { image: 'busybox:latest' }
     end

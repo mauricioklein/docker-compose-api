@@ -4,12 +4,12 @@ require_relative 'compose_port'
 require_relative '../utils/compose_utils'
 
 class ComposeContainer
-  attr_reader :attributes, :container, :dependencies
+  attr_reader :attributes, :internal_image, :container, :dependencies
 
-  def initialize(hash_attributes)
+  def initialize(hash_attributes, docker_container = nil)
     @attributes = {
       label: hash_attributes[:label],
-      name: hash_attributes[:name].nil? ? hash_attributes[:label] : hash_attributes[:name],
+      name: hash_attributes[:full_name] || ComposeUtils.generate_container_name(hash_attributes[:name], hash_attributes[:label]),
       image: ComposeUtils.format_image(hash_attributes[:image]),
       build: hash_attributes[:build],
       links: ComposeUtils.format_links(hash_attributes[:links]),
@@ -22,7 +22,7 @@ class ComposeContainer
 
     # Docker client variables
     @internal_image = nil
-    @container = nil
+    @container = docker_container
     @dependencies = []
   end
 

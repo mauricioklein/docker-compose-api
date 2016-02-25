@@ -72,5 +72,18 @@ describe Compose do
         expect(container3.dependencies.empty?).to be true
       end
     end
+
+    it 'should increment label when already exists' do
+      @compose = Compose.new
+
+      # Add the same container twice
+      @compose.add_container(ComposeContainer.new(@attributes_container1))
+      @compose.add_container(ComposeContainer.new(@attributes_container1))
+
+      label_first_container  = @compose.containers.keys[0]
+      label_second_container = @compose.containers.keys[1]
+
+      expect(label_first_container).to_not eq(label_second_container)
+    end
   end
 end
