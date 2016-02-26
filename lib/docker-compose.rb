@@ -24,7 +24,21 @@ module DockerCompose
 
     compose = Compose.new
 
-    # Create containers from compose file
+    # Load new containers
+    load_containers_from_file(filepath, compose)
+
+    # Load running containers
+    if do_load_running_containers
+      load_running_containers(compose)
+    end
+
+    # Perform containers linkage
+    compose.link_containers
+
+    compose
+  end
+
+  def self.load_containers_from_file(filepath, compose)
     _compose_entries = YAML.load_file(filepath)
 
     if _compose_entries
@@ -32,21 +46,15 @@ module DockerCompose
         compose.add_container(create_container(entry))
       end
     end
+  end
 
-    # Load running containers
-    if do_load_running_containers
-      Docker::Container
-        .all(all: true)
-        .select {|c| c.info['Names'].last.match(/\A\/#{ComposeUtils.dir_name}\w*/) }
-        .each do |container|
-          compose.add_container(load_running_container(container))
-      end
+  def self.load_running_containers(compose)
+    Docker::Container
+      .all(all: true)
+      .select {|c| c.info['Names'].last.match(/\A\/#{ComposeUtils.dir_name}\w*/) }
+      .each do |container|
+        compose.add_container(load_running_container(container))
     end
-
-    # Perform containers linkage
-    compose.link_containers
-
-    compose
   end
 
   def self.create_container(attributes)
@@ -83,5 +91,8 @@ module DockerCompose
     ComposeContainer.new(container_args, container)
   end
 
-  private_class_method :create_container, :load_running_container
+  private_class_method :load_containers_from_file,
+                       :create_container,
+                       :load_running_containers,
+                       :load_running_container
 end
