@@ -1,0 +1,37 @@
+version: 2
+
+services:
+  busybox1:
+    image: busybox
+    container_name: busybox-container
+    ports:
+      - "3000"
+      - "8000:8000"
+      - "127.0.0.1:8001:8001"
+    expose:
+      - "5000"
+    links:
+      - busybox2
+    command: ping busybox2
+    environment:
+      - MYENV1=variable1
+    volumes:
+      - "/tmp/test:/tmp:ro"
+    labels:
+      - com.example.foo=bar
+
+  busybox2:
+    image: busybox
+    expose:
+      - "6000"
+    command: ping localhost
+    environment:
+      MYENV2: variable2
+    labels:
+      com.example.foo: bar
+
+  busybox3:
+    image: busybox
+    links:
+      - busybox2:bb2
+    command: ping localhost
