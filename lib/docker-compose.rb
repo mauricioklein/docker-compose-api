@@ -1,6 +1,7 @@
 require_relative 'docker-compose/models/compose'
 require_relative 'docker-compose/models/compose_container'
 require_relative 'version'
+require_relative 'docker_compose_config'
 
 require 'yaml'
 require 'docker'
@@ -22,10 +23,13 @@ module DockerCompose
       raise ArgumentError, 'Compose file doesn\'t exists'
     end
 
+    # Parse the docker-compose config
+    config = DockerComposeConfig.new(filepath)
+
     compose = Compose.new
 
     # Load new containers
-    load_containers_from_file(filepath, compose)
+    load_containers_from_config(config, compose)
 
     # Load running containers
     if do_load_running_containers
@@ -38,11 +42,11 @@ module DockerCompose
     compose
   end
 
-  def self.load_containers_from_file(filepath, compose)
-    _compose_entries = YAML.load_file(filepath)
+  def self.load_containers_from_config(config, compose)
+    compose_entries = config.services
 
-    if _compose_entries
-      _compose_entries.each do |entry|
+    if compose_entries
+      compose_entries.each do |entry|
         compose.add_container(create_container(entry))
       end
     end
@@ -91,7 +95,7 @@ module DockerCompose
     ComposeContainer.new(container_args, container)
   end
 
-  private_class_method :load_containers_from_file,
+  private_class_method :load_containers_from_config,
                        :create_container,
                        :load_running_containers,
                        :load_running_container
