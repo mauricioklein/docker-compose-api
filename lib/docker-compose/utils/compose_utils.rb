@@ -98,8 +98,15 @@ module ComposeUtils
 
     port_entry.each do |key, value|
       container_port = key.gsub(/\D/, '').to_i
-      host_ip = value.first['HostIp']
-      host_port = value.first['HostPort']
+      # Ports that are EXPOSEd but not published won't have a Host IP/Port,
+      # only a Container Port.
+      if value.nil?
+        host_ip = ''
+        host_port = ''
+      else
+        host_ip = value.first['HostIp']
+        host_port = value.first['HostPort']
+      end
 
       entries << "#{container_port}:#{host_ip}:#{host_port}"
     end
