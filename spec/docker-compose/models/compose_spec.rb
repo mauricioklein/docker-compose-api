@@ -31,6 +31,14 @@ describe Compose do
         image: 'busybox:latest',
         command: 'ping -c 3 localhost'
       }
+
+      @attributes_container_from_environment = {
+        label: 'container_from_environment',
+        image: 'busybox:latest',
+        links: ['container3'],
+        command: 'ping -c 3 localhost',
+        loaded_from_environment: true
+      }
     end
 
     context 'Without dependencies' do
@@ -57,11 +65,12 @@ describe Compose do
         @compose = Compose.new
         @compose.add_container(ComposeContainer.new(@attributes_container2))
         @compose.add_container(ComposeContainer.new(@attributes_container3))
+        @compose.add_container(ComposeContainer.new(@attributes_container_from_environment))
         @compose.link_containers
       end
 
       it 'should have 2 containers' do
-        expect(@compose.containers.length).to eq(2)
+        expect(@compose.containers.length).to eq(3)
       end
 
       it 'container2 should depend on container3' do
@@ -70,6 +79,11 @@ describe Compose do
 
         expect(container2.dependencies.include?(container3)).to be true
         expect(container3.dependencies.empty?).to be true
+      end
+
+      it 'container loaded from environment should not have dependencies' do
+        container_from_environment = @compose.containers[@attributes_container_from_environment[:label]]
+        expect(container_from_environment.dependencies.empty?).to be true
       end
     end
 

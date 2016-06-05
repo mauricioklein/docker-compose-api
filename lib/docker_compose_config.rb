@@ -11,7 +11,6 @@ class DockerComposeConfig
     config = YAML.load_file(filepath)
 
     unless config
-      STDERR.puts "Empty YAML file: #{filepath}"
       config = YAML.load('{}')
     end
 

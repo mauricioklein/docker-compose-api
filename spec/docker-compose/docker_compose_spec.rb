@@ -2,8 +2,12 @@ require 'spec_helper'
 
 describe DockerCompose do
   context 'Without memory' do
-    before(:all) do
+    before(:each) {
       @compose = DockerCompose.load(File.expand_path('spec/docker-compose/fixtures/compose_1.yaml'))
+    }
+
+    after(:each) do
+      @compose.delete
     end
 
     it 'should be able to access gem version' do
@@ -60,9 +64,7 @@ describe DockerCompose do
 
         # Delete containers
         @compose.delete
-        @compose.containers.values.each do |container|
-          expect(container.exist?).to be false
-        end
+        expect(@compose.containers.empty?).to be true
       end
     end
 
@@ -297,17 +299,12 @@ describe DockerCompose do
           @compose.containers['busybox3']
       ])
     end
-
-    after(:all) do
-      @compose.delete
-    end
   end
 
   context 'With memory' do
     before(:all) do
       @compose1 = DockerCompose.load(File.expand_path('spec/docker-compose/fixtures/compose_1.yaml'), false)
       @compose1.start
-
       @compose2 = DockerCompose.load(File.expand_path('spec/docker-compose/fixtures/empty_compose.yml'), true)
     end
 
@@ -319,10 +316,14 @@ describe DockerCompose do
       docker_containers_compose1 = @compose1.containers.values.select { |c| c.container }
       docker_containers_compose2 = @compose2.containers.values.select { |c| c.container }
 
-      # Check that both composes have the same containers (based on its names)
+      # Check that both @composes have the same containers (based on its names)
       docker_containers_compose2.each_index do |index|
         expect(docker_containers_compose2[index].attributes['Name']).to eq(docker_containers_compose1[index].attributes['Name'])
       end
+    end
+
+    it 'expect last container from @compose2 to be assigned as loaded from environment' do
+      expect(@compose2.containers.values.last.loaded_from_environment?).to be true
     end
 
     after(:all) do
