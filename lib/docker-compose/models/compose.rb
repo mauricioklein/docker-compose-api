@@ -50,7 +50,7 @@ class Compose
     @containers.each_value do |container|
       links = container.attributes[:links]
 
-      next if links.nil?
+      next if (container.loaded_from_environment? or links.nil?)
 
       links.each do |service, label|
         dependency_container = @containers[service]
@@ -101,6 +101,7 @@ class Compose
   #
   def delete(labels = [])
     call_container_method(:delete, labels)
+    delete_containers_entries(labels)
   end
 
   private
@@ -114,6 +115,16 @@ class Compose
 
     containers.values.each do |entry|
       entry.send(method)
+    end
+
+    true
+  end
+
+  def delete_containers_entries(labels = [])
+    labels = @containers.keys if labels.empty?
+
+    labels.each do |label|
+      @containers.delete(label)
     end
 
     true

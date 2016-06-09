@@ -53,22 +53,35 @@ describe ComposeUtils do
   end
 
   context 'Format ports from running containers' do
-    before(:all) do
-      @hash_attr = {
-        '8000/tcp' => [{
-          'HostIp' => '0.0.0.0',
-          'HostPort' => '4444'
-        }]
+    context 'filled port attributes' do
+      let(:hash_attr) {
+        {
+          '8000/tcp' => [{
+            'HostIp' => '0.0.0.0',
+            'HostPort' => '4444'
+          }]
+        }
       }
-      @expected_format = ['8000:0.0.0.0:4444']
+      let(:expected_format) { ['8000:0.0.0.0:4444'] }
+
+      it 'should format ports correctly' do
+        expect(ComposeUtils.format_ports_from_running_container(hash_attr)).to eq(expected_format)
+      end
     end
 
-    it 'should format ports correctly' do
-      expect(ComposeUtils.format_ports_from_running_container(@hash_attr)).to eq(@expected_format)
+    context 'port without value' do
+      let(:hash_attr) { {'8000/tcp' => nil} }
+      let(:expected_format) { ['8000::'] }
+
+      it 'should format ports correctly' do
+        expect(ComposeUtils.format_ports_from_running_container(hash_attr)).to eq(expected_format)
+      end
     end
 
-    it 'should return an empty array when ports are nil' do
-      expect(ComposeUtils.format_ports_from_running_container(nil)).to eq([])
+    context 'nil port' do
+      it 'should return an empty array when ports are nil' do
+        expect(ComposeUtils.format_ports_from_running_container(nil)).to eq([])
+      end
     end
   end
 

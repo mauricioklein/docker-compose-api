@@ -122,15 +122,20 @@ describe ComposeContainer do
   end
 
   context 'From Dockerfile' do
-    before(:all) do
-      attributes = {
+    before(:all) {
+      @attributes = {
         label: 'foobar',
         build: File.expand_path('spec/docker-compose/fixtures/'),
         links: ['links:links'],
         volumes: ['/tmp']
       }
 
-      @entry = ComposeContainer.new(attributes)
+      @entry = ComposeContainer.new(@attributes)
+    }
+
+    after(:all) do
+      Docker::Image.get(@entry.internal_image).remove(force: true)
+      @entry.delete
     end
 
     it 'should start/stop a container' do
@@ -153,11 +158,6 @@ describe ComposeContainer do
       # Stop container
       @entry.stop
       expect(@entry.running?).to be false
-    end
-
-    after(:all) do
-      Docker::Image.get(@entry.internal_image).remove(force: true)
-      @entry.delete
     end
   end
 

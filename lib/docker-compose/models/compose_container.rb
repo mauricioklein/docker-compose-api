@@ -9,6 +9,7 @@ class ComposeContainer
   def initialize(hash_attributes, docker_container = nil)
     @attributes = {
       label: hash_attributes[:label],
+      loaded_from_environment: hash_attributes[:loaded_from_environment] || false,
       name: hash_attributes[:full_name] || ComposeUtils.generate_container_name(hash_attributes[:name], hash_attributes[:label]),
       image: ComposeUtils.format_image(hash_attributes[:image]),
       build: hash_attributes[:build],
@@ -24,6 +25,14 @@ class ComposeContainer
     @internal_image = nil
     @container = docker_container
     @dependencies = []
+  end
+
+  #
+  # Returns true if is a container loaded from
+  # environment instead compose file (i.e. a running container)
+  #
+  def loaded_from_environment?
+    attributes[:loaded_from_environment]
   end
 
   private

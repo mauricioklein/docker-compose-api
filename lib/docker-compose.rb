@@ -89,7 +89,9 @@ module DockerCompose
       volumes:     info['Config']['Volumes'],
       command:     info['Config']['Cmd'].join(' '),
       environment: info['Config']['Env'],
-      labels:      info['Config']['Labels']
+      labels:      info['Config']['Labels'],
+
+      loaded_from_environment: true
     }
 
     ComposeContainer.new(container_args, container)
