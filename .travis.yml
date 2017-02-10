@@ -1,6 +1,6 @@
 language: ruby
 
-rvm: 
+rvm:
   - 2.2.0
 
 sudo: required
@@ -15,3 +15,6 @@ install:
 
 script:
   - bundle exec rspec
+
+after_success:
+  - bundle exec codeclimate-test-reported

@@ -8,6 +8,4 @@ SimpleCov.start do
   add_filter '/spec/'
 end
 
-CodeClimate::TestReporter.start
-
 require 'docker-compose'
