@@ -17,4 +17,4 @@ script:
   - bundle exec rspec
 
 after_success:
-  - bundle exec codeclimate-test-reported
+  - bundle exec codeclimate-test-reporter
