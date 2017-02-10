@@ -218,7 +218,7 @@ describe DockerCompose do
       container.start
 
       env = container.stats['Config']['Env']
-      expect(env).to eq(%w(MYENV1=variable1))
+      expect(env).to include('MYENV1=variable1')
 
       # Stop container
       container.stop
@@ -231,7 +231,7 @@ describe DockerCompose do
       container.start
 
       env = container.stats['Config']['Env']
-      expect(env).to eq(%w(MYENV2=variable2))
+      expect(env).to include('MYENV2=variable2')
 
       # Stop container
       container.stop
