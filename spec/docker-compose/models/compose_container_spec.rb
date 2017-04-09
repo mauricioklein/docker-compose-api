@@ -19,34 +19,34 @@ describe ComposeContainer do
     end
 
     it 'should prepare attributes correctly' do
-      expect(@entry.attributes[:image]).to eq(@attributes[:image])
-      expect(@entry.attributes[:name]).to match(/#{ComposeUtils.dir_name}_#{@attributes[:name]}_\d+/)
-      expect(@entry.attributes[:links])
+      expect(@entry.attributes.image).to eq(@attributes[:image])
+      expect(@entry.attributes.name).to match(/#{ComposeUtils.dir_name}_#{@attributes[:name]}_\d+/)
+      expect(@entry.attributes.links)
         .to eq({'service1' => 'label', 'service2' => 'service2'})
-      expect(@entry.attributes[:volumes]).to eq(@attributes[:volumes])
-      expect(@entry.attributes[:command]).to eq(@attributes[:command].split(' '))
-      expect(@entry.attributes[:environment]).to eq(@attributes[:environment])
-      expect(@entry.attributes[:labels]).to eq(@attributes[:labels])
+      expect(@entry.attributes.volumes).to eq(@attributes[:volumes])
+      expect(@entry.attributes.command).to eq(@attributes[:command].split(' '))
+      expect(@entry.attributes.environment).to eq(@attributes[:environment])
+      expect(@entry.attributes.labels).to eq(@attributes[:labels])
     end
 
     it 'should map ports' do
       # Check ports structure
-      expect(@entry.attributes[:ports].length).to eq(@attributes[:ports].length)
+      expect(@entry.attributes.ports.length).to eq(@attributes[:ports].length)
 
       # Port 1: '3000'
-      port_entry = @entry.attributes[:ports][0]
+      port_entry = @entry.attributes.ports[0]
       expect(port_entry.container_port).to eq('3000')
       expect(port_entry.host_ip).to eq(nil)
       expect(port_entry.host_port).to eq(nil)
 
       # Port 2: '8000:8000'
-      port_entry = @entry.attributes[:ports][1]
+      port_entry = @entry.attributes.ports[1]
       expect(port_entry.container_port).to eq('8000')
       expect(port_entry.host_ip).to eq(nil)
       expect(port_entry.host_port).to eq('8000')
 
       # Port 3: '127.0.0.1:8001:8001'
-      port_entry = @entry.attributes[:ports][2]
+      port_entry = @entry.attributes.ports[2]
       expect(port_entry.container_port).to eq('8001')
       expect(port_entry.host_ip).to eq('127.0.0.1')
       expect(port_entry.host_port).to eq('8001')
@@ -109,7 +109,7 @@ describe ComposeContainer do
       #Start container
       @entry_autogen_name.start
 
-      expect(@entry_autogen_name.stats['Name']).to match(/#{ComposeUtils.dir_name}_#{@entry_autogen_name.attributes[:label]}_\d+/)
+      expect(@entry_autogen_name.stats['Name']).to match(/#{ComposeUtils.dir_name}_#{@entry_autogen_name.attributes.label}_\d+/)
 
       # Stop container
       @entry_autogen_name.stop
@@ -194,7 +194,7 @@ describe ComposeContainer do
     end
 
     it 'should prepare environment attribute correctly' do
-      expect(@entry.attributes[:environment]).to eq(%w(ENVIRONMENT=VALUE))
+      expect(@entry.attributes.environment).to eq(%w(ENVIRONMENT=VALUE))
     end
 
     after(:all) do
