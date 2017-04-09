@@ -14,7 +14,7 @@ module ComposeUtils
     #
     def next_available_container_id
       get_container_id = -> (container) { container.info['Names'].last.split(/_/).last.to_i }
-      current_container_id = Docker::Container.all(all: true).map { |c| get_container_id(c) }.flatten.max || 0
+      current_container_id = Docker::Container.all(all: true).map { |c| get_container_id.call(c) }.flatten.max || 0
       current_container_id + 1
     end
 
