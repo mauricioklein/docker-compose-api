@@ -202,7 +202,8 @@ describe ComposeContainer do
     end
   end
 
-  describe 'prepare_volumes' do
+  # Moved to ContainerUtils
+  xdescribe 'prepare_volumes' do
     let(:attributes) do
       { image: 'busybox:latest' }
     end
