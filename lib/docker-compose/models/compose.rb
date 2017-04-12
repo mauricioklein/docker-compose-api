@@ -16,11 +16,11 @@ class Compose
   #
   def add_container(container)
     # Avoid duplicated labels on compose
-    while @containers.has_key?(container.attributes[:label]) do
-      container.attributes[:label].succ!
+    while @containers.has_key?(container.attributes.label) do
+      container.attributes.label.succ!
     end
 
-    @containers[container.attributes[:label]] = container
+    @containers[container.attributes.label] = container
     true
   end
 
@@ -29,7 +29,7 @@ class Compose
   #
   def get_containers_by(params)
     @containers.values.select do |container|
-      (params.to_a - container.attributes.to_a).empty?
+      (params.to_a - container.attributes.to_h.to_a).empty?
     end
   end
 
@@ -39,7 +39,7 @@ class Compose
   #
   def get_containers_by_given_name(given_name)
     @containers.select { |label, container|
-      container.attributes[:name].match(/#{ComposeUtils.dir_name}_#{given_name}_\d+/)
+      container.attributes.name.match(/#{ComposeUtils.dir_name}_#{given_name}_\d+/)
     }.values
   end
 
@@ -48,7 +48,7 @@ class Compose
   #
   def link_containers
     @containers.each_value do |container|
-      links = container.attributes[:links]
+      links = container.attributes.links
 
       next if (container.loaded_from_environment? or links.nil?)
 

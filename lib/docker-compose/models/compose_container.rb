@@ -177,7 +177,7 @@ class ComposeContainer
     links = []
 
     dependencies.each do |dependency|
-      link_name = attributes.links[dependency.attributes[:label]]
+      link_name = attributes.links[dependency.attributes.label]
       links << "#{dependency.stats['Id']}:#{link_name}"
     end
 
