@@ -8,7 +8,10 @@ class DockerComposeConfig
 
   # Parse the docker-compose config
   def parse_docker_compose_config(filepath)
-    config = YAML.load_file(filepath)
+    f = File.read(filepath)
+    f = f.gsub(/\$([a-zA-Z_]+[a-zA-Z0-9_]*)|\$\{(.+)\}/) { ENV[$1 || $2] }
+
+    config = YAML.load(f)
 
     unless config
       config = YAML.load('{}')
