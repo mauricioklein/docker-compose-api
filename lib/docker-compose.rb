@@ -55,7 +55,7 @@ module DockerCompose
   def self.load_running_containers(compose)
     Docker::Container
       .all(all: true)
-      .select {|c| c.info['Names'].last.match(/\A\/#{ComposeUtils.dir_name}\w*/) }
+      .select {|c| c.info['Labels']['com.docker.compose.project'] == ComposeUtils.dir_name }
       .each do |container|
         compose.add_container(load_running_container(container))
     end
@@ -64,7 +64,7 @@ module DockerCompose
   def self.create_container(attributes)
     ComposeContainer.new({
       label: attributes[0],
-      name: attributes[1]['container_name'],
+      full_name: attributes[1]['container_name'],
       image: attributes[1]['image'],
       build: attributes[1]['build'],
       links: attributes[1]['links'],

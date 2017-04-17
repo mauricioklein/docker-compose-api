@@ -19,7 +19,9 @@ class ComposeContainer
       command: ComposeUtils.format_command(hash_attributes[:command]),
       environment: prepare_environment(hash_attributes[:environment]),
       labels: prepare_labels(hash_attributes[:labels])
-    }.reject{ |key, value| value.nil? }
+    }.reject { |key, value| value.nil? }
+
+    prepare_compose_labels
 
     # Docker client variables
     @internal_image = nil
@@ -180,6 +182,17 @@ class ComposeContainer
   def prepare_labels(labels)
     return labels unless labels.is_a?(Array)
     Hash[labels.map { |label| label.split('=') }]
+  end
+
+  #
+  # Adds internal docker-compose labels
+  #
+  def prepare_compose_labels
+    @attributes[:labels] = {} unless @attributes[:labels].is_a?(Hash)
+
+    @attributes[:labels]['com.docker.compose.project'] = ComposeUtils.dir_name
+    @attributes[:labels]['com.docker.compose.service'] = @attributes[:label]
+    @attributes[:labels]['com.docker.compose.oneoff'] = 'False'
   end
 
   #
