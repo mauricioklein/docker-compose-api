@@ -1,7 +1,6 @@
 require_relative 'docker-compose/models/compose'
 require_relative 'docker-compose/models/compose_container'
 require_relative 'version'
-require_relative 'docker_compose_config'
 
 require 'yaml'
 require 'docker'
