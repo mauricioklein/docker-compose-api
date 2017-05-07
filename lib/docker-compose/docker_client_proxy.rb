@@ -4,6 +4,10 @@ require 'docker'
 class DockerClientProxy
   include Singleton
 
+  def image_exists?(image_name)
+    Docker::Image.exist?(image_name)
+  end
+
   def pull_image(image)
     Docker::Image.create('fromImage' => image)
   end

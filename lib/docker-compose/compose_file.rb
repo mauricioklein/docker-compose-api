@@ -1,4 +1,6 @@
-# Support multiple versions for docker-compose configs.
+require 'yaml'
+require 'hash_dot'
+
 class ComposeFile
   attr_reader :content
 
@@ -7,7 +9,7 @@ class ComposeFile
   end
 
   def version
-    content['version']
+    content.version
   end
 
 private
@@ -17,8 +19,9 @@ private
       File
         .read(filepath)
         .gsub(/\$([a-zA-Z_]+[a-zA-Z0-9_]*)|\$\{(.+)\}/) { ENV[$1 || $2] }
-        
-    @content = YAML.load(file)
+
+
+    @content = YAML.load(file).to_dot
   rescue TypeError, StandardError => e
     fail ComposeFileLoadException.new(e)
   end

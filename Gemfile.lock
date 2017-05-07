@@ -1,8 +1,9 @@
 PATH
   remote: .
   specs:
-    docker-compose-api (1.1.4)
+    docker-compose-api (1.1.5)
       docker-api (~> 1.33)
+      hash_dot (~> 2.1)
 
 GEM
   remote: https://rubygems.org/
@@ -16,6 +17,7 @@ GEM
       excon (>= 0.38.0)
       json
     excon (0.55.0)
+    hash_dot (2.1.0)
     json (2.0.4)
     rspec (3.5.0)
       rspec-core (~> 3.5.0)
