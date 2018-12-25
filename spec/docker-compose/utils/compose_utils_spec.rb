@@ -37,6 +37,13 @@ describe ComposeUtils do
       expect(compose_port.host_ip).to eq(nil)
     end
 
+    it 'should be able to use numeric ports too in pattern "[container port]"' do
+      compose_port = ComposeUtils.format_port(8080)
+      expect(compose_port.container_port).to eq('8080')
+      expect(compose_port.host_port).to eq(nil)
+      expect(compose_port.host_ip).to eq(nil)
+    end
+
     it 'should recognize pattern "[host port]:[container port]"' do
       compose_port = ComposeUtils.format_port('8080:7777')
       expect(compose_port.container_port).to eq('7777')

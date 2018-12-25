@@ -64,7 +64,7 @@ module ComposeUtils
     host_port = nil
     host_ip = nil
 
-    port_parts = port_entry.split(':')
+    port_parts = port_entry.to_s.split(':')
 
     case port_parts.length
       # [container port]
