@@ -30,9 +30,16 @@ module ComposeUtils
   def self.format_image(image)
     base_image = nil
     tag = nil
+    repo = nil
 
     if image.nil?
       return nil
+    end
+
+    unless image.index('/').nil?
+      path_split = image.rpartition('/')
+      image = path_split.last
+      repo = path_split.first + '/'
     end
 
     if image.index(':').nil?
@@ -44,7 +51,7 @@ module ComposeUtils
       tag = image_split[1]
     end
 
-    "#{base_image}:#{tag}"
+    "#{repo}#{base_image}:#{tag}"
   end
 
   #

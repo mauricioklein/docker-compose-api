@@ -13,6 +13,11 @@ describe ComposeUtils do
     it 'should assign base image and tag when both are provided' do
       expect(ComposeUtils.format_image('ubuntu:11')).to eq('ubuntu:11')
     end
+
+    it 'should return valid tag if repository port specified' do
+      expect(ComposeUtils.format_image('localhost:5000/test')).to eq('localhost:5000/test:latest')
+      expect(ComposeUtils.format_image('localhost:5000/test:tag')).to eq('localhost:5000/test:tag')
+    end
   end
 
   context 'Format command' do
